@@ -1,0 +1,59 @@
+{
+  "data": {
+    "threaded_conversation": {
+      "instructions": [
+        {
+          "type": "TimelineAddEntries",
+          "entries": [
+            {
+              "entryId": "tweet-1750000000000000010",
+              "content": {
+                "entryType": "TimelineTimelineItem",
+                "itemContent": {
+                  "itemType": "TimelineTweet",
+                  "item": {
+                    "__typename": "Tweet",
+                    "rest_id": "1750000000000000010",
+                    "core": {
+                      "user_results": {
+                        "result": {
+                          "core": {
+                            "name": "Timeline Person"
+                          }
+                        }
+                      }
+                    },
+                    "legacy": {
+                      "id_str": "1750000000000000010",
+                      "full_text": "from a conversation",
+                      "created_at": "Wed Jun 14 12:00:00 +0000 2023"
+                    },
+                    "extended_entities": {
+                      "media": [
+                        {
+                          "id_str": "1900000000000000011",
+                          "type": "video",
+                          "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/ghi.jpg",
+                          "video_info": {
+                            "duration_millis": 3100,
+                            "variants": [
+                              {
+                                "bitrate": 632000,
+                                "content_type": "video/mp4",
+                                "url": "https://video.twimg.com/ext_tw_video/ghi/mid.mp4?tag=9"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

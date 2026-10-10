@@ -1,0 +1,58 @@
+{
+  "data": {
+    "user": {
+      "result": {
+        "timeline_v2": {
+          "timeline": {
+            "instructions": [
+              {
+                "type": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "item": {
+                          "__typename": "Tweet",
+                          "rest_id": "1750000000000000020",
+                          "core": {
+                            "user_results": {
+                              "result": {
+                                "core": {
+                                  "name": "Timeline Person"
+                                }
+                              }
+                            }
+                          },
+                          "legacy": {
+                            "id_str": "1750000000000000020",
+                            "full_text": "from a profile timeline",
+                            "created_at": "Wed Jun 14 12:00:00 +0000 2023"
+                          },
+                          "extended_entities": {
+                            "media": [
+                              {
+                                "id_str": "1900000000000000021",
+                                "type": "photo",
+                                "media_url_https": "https://pbs.twimg.com/media/jkl.jpg",
+                                "original_info": {
+                                  "width": 1200,
+                                  "height": 800
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

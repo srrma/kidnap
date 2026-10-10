@@ -1,0 +1,76 @@
+{
+  "data": {
+    "threaded_conversation_with_injections_v2": {
+      "instructions": [
+        {
+          "type": "TimelineAddEntries",
+          "entries": [
+            {
+              "entryId": "tweet-2108900948303065262",
+              "content": {
+                "entryType": "TimelineTimelineItem",
+                "itemContent": {
+                  "itemType": "TimelineTweet",
+                  "tweet_results": {
+                    "result": {
+                      "__typename": "Tweet",
+                      "rest_id": "2108900948303065262",
+                      "core": {
+                        "user_results": {
+                          "result": {
+                            "core": {
+                              "name": "Example Channel"
+                            }
+                          }
+                        }
+                      },
+                      "legacy": {
+                        "id_str": "2108900948303065262",
+                        "full_text": "the goal from last night",
+                        "created_at": "Wed Jun 14 12:00:00 +0000 2023",
+                        "extended_entities": {
+                          "media": [
+                            {
+                              "id_str": "2108900948303065263",
+                              "type": "video",
+                              "media_key": "3_2108900948303065263",
+                              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/detail.jpg",
+                              "original_info": {
+                                "width": 1280,
+                                "height": 720
+                              },
+                              "video_info": {
+                                "duration_millis": 8200,
+                                "variants": [
+                                  {
+                                    "bitrate": 256000,
+                                    "content_type": "video/mp4",
+                                    "url": "https://video.twimg.com/amplify_video/2108900948303065263/vid/avc1/low.mp4?tag=1"
+                                  },
+                                  {
+                                    "bitrate": 2176000,
+                                    "content_type": "video/mp4",
+                                    "url": "https://video.twimg.com/amplify_video/2108900948303065263/vid/avc1/high.mp4?tag=2"
+                                  },
+                                  {
+                                    "bitrate": 832000,
+                                    "content_type": "application/x-mpegURL",
+                                    "url": "https://video.twimg.com/amplify_video/2108900948303065263/pl/index.m3u8?tag=3"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

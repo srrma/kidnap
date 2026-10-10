@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+artifacts/
+coverage/
+*.tsbuildinfo
+
+# Packaging
+*.zip
+*.crx
+*.xpi
+
+# Local machine noise
+**/.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json

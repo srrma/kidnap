@@ -1,0 +1,60 @@
+{
+  "data": {
+    "tweetResult": {
+      "result": {
+        "__typename": "Tweet",
+        "rest_id": "1750000000000000000",
+        "core": {
+          "user_results": {
+            "result": {
+              "core": {
+                "name": "Example Sport",
+                "screen_name": "examplesport"
+              }
+            }
+          }
+        },
+        "legacy": {
+          "id_str": "1750000000000000000",
+          "full_text": "a short clip from the match",
+          "created_at": "Wed Jun 14 12:00:00 +0000 2023"
+        },
+        "extended_entities": {
+          "media": [
+            {
+              "id_str": "1900000000000000001",
+              "type": "video",
+              "media_key": "3_1900000000000000001",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/abc.jpg",
+              "ext_alt_text": "a player striking a ball",
+              "original_info": {
+                "width": 1920,
+                "height": 1080
+              },
+              "video_info": {
+                "duration_millis": 7400,
+                "variants": [
+                  {
+                    "bitrate": 256000,
+                    "content_type": "video/mp4",
+                    "url": "https://video.twimg.com/ext_tw_video/abc/low.mp4?tag=1"
+                  },
+                  {
+                    "bitrate": 2176000,
+                    "content_type": "video/mp4",
+                    "url": "https://video.twimg.com/ext_tw_video/abc/high.mp4?tag=2"
+                  },
+                  {
+                    "bitrate": 832000,
+                    "content_type": "application/x-mpegURL",
+                    "url": "https://video.twimg.com/ext_tw_video/abc/p.m3u8?tag=3"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

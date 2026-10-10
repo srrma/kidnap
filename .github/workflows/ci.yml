@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      - name: Build Chromium
+        run: npm run build
+      - name: Build Firefox
+        run: npm run build:firefox
+
+      - name: Add-on parity against the previous extractors
+        run: node scripts/parity.mjs
+
+      - name: Package both targets
+        run: npm run package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kidnap-packages
+          path: artifacts/*.zip
+
+  bundle-size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # The page-world hook is injected into every page on every site. A
+      # regression here is felt by every user of every site, so it is measured
+      # rather than assumed.
+      - name: Page hook budget
+        run: |
+          size=$(gzip -c dist/page-hook.js | wc -c)
+          echo "page-hook.js gzipped: ${size} bytes"
+          if [ "$size" -gt 8192 ]; then
+            echo "page hook grew past its 8 KB budget"
+            exit 1
+          fi

@@ -1,0 +1,38 @@
+{
+  "data": {
+    "tweetResult": {
+      "result": {
+        "__typename": "Tweet",
+        "rest_id": "1750000000000000002",
+        "core": {
+          "user_results": {
+            "result": {
+              "core": {
+                "name": "Archive Desk"
+              }
+            }
+          }
+        },
+        "legacy": {
+          "id_str": "1750000000000000002",
+          "full_text": "photo from the archive",
+          "created_at": "Wed Jun 14 12:00:00 +0000 2023"
+        },
+        "extended_entities": {
+          "media": [
+            {
+              "id_str": "1900000000000000003",
+              "type": "photo",
+              "media_url_https": "https://pbs.twimg.com/media/DEF.jpg?format=jpg&name=small",
+              "original_info": {
+                "width": 2400,
+                "height": 1600
+              },
+              "ext_alt_text": "a scanned index card"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

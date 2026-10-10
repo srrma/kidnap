@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "taken_at": 1750000000,
+      "id": "3300000000000000001_1234",
+      "caption": {
+        "text": "morning run"
+      },
+      "user": {
+        "username": "example.runner"
+      },
+      "image_versions2": {
+        "candidates": [
+          {
+            "url": "https://scontent.cdninstagram.com/v/t51.2885-15/cover.jpg",
+            "width": 640,
+            "height": 640
+          }
+        ]
+      },
+      "video_versions": [
+        {
+          "type": 101,
+          "width": 720,
+          "height": 1280,
+          "url": "https://scontent.cdninstagram.com/v/tik/720.mp4"
+        },
+        {
+          "type": 102,
+          "width": 1080,
+          "height": 1920,
+          "url": "https://scontent.cdninstagram.com/v/tik/1080.mp4"
+        }
+      ],
+      "code": "ABC123xyz",
+      "video_duration": 14.5
+    }
+  ]
+}

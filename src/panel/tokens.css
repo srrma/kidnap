@@ -1,0 +1,111 @@
+/*
+ * Design tokens.
+ *
+ * Two themes, both first class. The accent is the only chroma in the product
+ * and it is spent on the primary action and the active filter, nowhere else,
+ * because an accent used everywhere is not an accent.
+ *
+ * Every text pairing below was checked against WCAG AA with the contrast
+ * checker rather than judged by eye. Ratios are noted where they are close.
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --surface: #f7f7f8;
+  --surface-raised: #ffffff;
+  --border: #d9d8de;
+  --border-strong: #b7b5c0;
+
+  --text: #16151a;
+  --text-muted: #5c5a66;
+  --text-faint: #6e6b7a;
+
+  --accent: #d3234a;
+  --accent-hover: #b81e40;
+  --on-accent: #ffffff;
+
+  --kind-image: #2f6f4f;
+  --kind-video: #7a4bbd;
+  /* Darkened from #b06a1e, which was 3.98:1 on the tile surface. */
+  --kind-audio: #8f5417;
+  --kind-stream: #1f6f8b;
+  --kind-document: #5c5a66;
+
+  --scrim: rgb(20 19 26 / 38%);
+
+  /* M3 Expressive radii on the controls that carry meaning, Apple HIG
+     restraint on everything that is content. See DESIGN.md. */
+  --r-pill: 999px;
+  --r-input: 8px;
+  --r-row: 10px;
+  --r-sheet: 16px;
+
+  --focus: #1f6feb;
+
+  --shadow-sheet: 0 -8px 32px rgb(20 19 26 / 18%);
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #14131a;
+  --surface: #1d1c24;
+  --surface-raised: #26252f;
+  --border: #33323e;
+  --border-strong: #4d4b5a;
+
+  --text: #f2f1f5;
+  --text-muted: #a3a0ae;
+  --text-faint: #8d8a99;
+
+  --accent: #ff6b83;
+  --accent-hover: #ff8b9e;
+  --on-accent: #1a0d12;
+
+  --kind-image: #6fce9f;
+  --kind-video: #c2a0f5;
+  --kind-audio: #f0b26b;
+  --kind-stream: #7fd0e8;
+  --kind-document: #a3a0ae;
+
+  --scrim: rgb(0 0 0 / 55%);
+
+  --focus: #8ab4ff;
+
+  --shadow-sheet: 0 -8px 32px rgb(0 0 0 / 45%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #14131a;
+    --surface: #1d1c24;
+    --surface-raised: #26252f;
+    --border: #33323e;
+    --border-strong: #4d4b5a;
+
+    --text: #f2f1f5;
+    --text-muted: #a3a0ae;
+    --text-faint: #8d8a99;
+
+    --accent: #ff6b83;
+    --accent-hover: #ff8b9e;
+    --on-accent: #1a0d12;
+
+    --kind-image: #6fce9f;
+    --kind-video: #c2a0f5;
+    --kind-audio: #f0b26b;
+    --kind-stream: #7fd0e8;
+    --kind-document: #a3a0ae;
+
+    --scrim: rgb(0 0 0 / 55%);
+    --focus: #8ab4ff;
+    --shadow-sheet: 0 -8px 32px rgb(0 0 0 / 45%);
+  }
+}

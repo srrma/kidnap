@@ -1,0 +1,16 @@
+{
+  "itemStruct": {
+    "id": "7400000000000000000",
+    "desc": "three second recipe #food",
+    "createTime": 1750000000,
+    "author": { "uniqueId": "example.chef" },
+    "cover": "https://p16-sign.tiktokcdn.com/cover.jpeg",
+    "video": {
+      "duration": 14,
+      "width": 1080,
+      "height": 1920,
+      "playAddr": { "urlList": ["https://v16-webapp.tiktok.com/video/tos/clip.mp4"] },
+      "downloadAddr": { "urlList": ["https://v16-webapp.tiktok.com/video/tos/download.mp4"] }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+# Changelog
+
+## 3.0.0
+
+A rewrite. The extension is named the same and works the same way, but almost
+every part of it is new.
+
+### Added
+
+- A declarative add-on system. Add-ons are JSON, validated on the way in, and
+  cannot execute code. Eight built-ins ship enabled, each backed by a captured
+  response fixture.
+- `when` conditions, fixed values, last-path-segment reads and permalink
+  templates in the add-on language, each added because a platform needed it.
+- Rewrites now apply to every recorded URL rather than only to URLs the same
+  add-on produced, so a rewrite-only add-on works.
+- `scripts/parity.mjs` fails the build if an add-on stops emitting a field the
+  previous extractors emitted.
+- Stream assembly through mediabunny, which replaces the unmaintained mux.js.
+  Fragmented MP4 streams, rotating encryption keys and byte ranges now work,
+  all three of which the previous parser got wrong.
+- Cancellation for running stream jobs.
+- A per-host mute list, so detection can be switched off on a site without
+  uninstalling anything.
+- A working light and dark theme, with a system option. The previous version
+  was dark only.
+- Single-key media storage. A busy page writes a handful of times instead of
+  once per detection.
+- Video posters decoded from the file, generated only for rows on screen and at
+  most two at a time. v2 had a poster generator wired to nothing.
+- MIT licensing, a Firefox build, and a contributor guide.
+
+### Fixed
+
+- Quality variants of one post now collapse into one row. Previously only three
+  platforms grouped them at all, and the lowest bitrate was often the one shown
+  as the best.
+- X detection works on timelines and conversations, not only on a tweet opened
+  directly. Previously one endpoint shape was handled and the rest silently
+  found nothing.
+- A user minimum image size is applied at every filter level, including
+  relaxed. It was silently ignored before.
+- Embedded SVG art is no longer discarded for being small, since vector
+  compresses far harder than raster.
+- Panel rows update when an item's details change after the row is drawn. They
+  used to freeze at whatever was known when they first appeared.
+- Host matching is on label boundaries, so a lookalike domain can no longer
+  match another site's rules.
+- The reserved Windows device names can no longer produce an unsaveable
+  filename.
+
+### Removed
+
+- Three permissions that were declared but unused: `declarativeNetRequest`,
+  `scripting` and `activeTab`.
+- SoundCloud support. It depended on regex-scraping a client id out of a
+  minified bundle, which breaks whenever they ship a new one.
+- A MediaRecorder capture path that the interface never exposed.
+
+### Not carried over
+
+The Blob handling stance, the garbage filter levels and the no-DRM position are
+all unchanged and their reasons are recorded in `docs/adr/`.
