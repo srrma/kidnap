@@ -25,6 +25,13 @@ export interface Messages {
   'dom:media': { req: { items: RawItem[]; page?: PageContext }; res: void };
   'hook:media': { req: { url: string; source?: string; blob?: boolean }; res: void };
   'api:body': { req: { url: string; body: string }; res: void };
+  /*
+   * A page whose data is rendered into the HTML rather than fetched. The
+   * content script only sends this when the document actually contains one of
+   * the markers, because the alternative is sending every page ever visited.
+   */
+  'doc:html': { req: { url: string; html: string }; res: void };
+  'addons:markers': { req: void; res: { markers: string[] } };
   'drm:seen': { req: { tabId?: number }; res: void };
 
   /* panel into the background */
@@ -51,12 +58,22 @@ export interface Messages {
     res: void;
   };
   'assemble:choose': { req: { jobId: string; index: number }; res: void };
+  /*
+   * The offscreen document announces itself once its listeners exist. Work
+   * posted before that is dropped, because nothing is listening yet.
+   */
+  'offscreen:ready': { req: void; res: void };
 
   /* the assembler reporting back */
   'assemble:progress': { req: { jobId: string; progress: number; detail?: string }; res: void };
   'assemble:choices': { req: { jobId: string; choices: StreamChoice[] }; res: void };
   'assemble:done': { req: { jobId: string; blobUrl: string; filename: string }; res: void };
   'assemble:failed': { req: { jobId: string; error: string }; res: void };
+
+  'font:ttf:done': {
+    req: { id: string; blobUrl?: string; filename: string; error?: string };
+    res: void;
+  };
 }
 
 export type MessageName = keyof Messages;

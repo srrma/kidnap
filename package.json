@@ -22,7 +22,8 @@
     "verify": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
-    "mediabunny": "^1.55.5"
+    "mediabunny": "^1.55.5",
+    "wawoff2": "^2.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",

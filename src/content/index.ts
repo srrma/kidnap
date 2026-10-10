@@ -8,7 +8,7 @@
  */
 
 import { BUILTIN_ADDONS } from '../addons/builtin';
-import { on, post } from '../bus/protocol';
+import { on, post, request } from '../bus/protocol';
 import { guessMime } from '../core/kind';
 import type { Settings } from '../core/types';
 import { api } from '../platform';
@@ -88,6 +88,32 @@ function awaitHook(): void {
     handOverConfig();
   });
   ensureHook();
+}
+
+let documentOffered = false;
+
+/**
+ * Hands the page over as text, for the sites that render their data into the
+ * HTML instead of fetching it.
+ *
+ * The check is done here rather than in the background because the markers are
+ * cheap to test against a string the page already holds in memory, while
+ * sending the document is not cheap at all: a font catalogue page is around
+ * 400 KB of markup. Asking first and testing locally means a normal page costs
+ * one small message and nothing more.
+ */
+async function offerDocument(): Promise<void> {
+  if (documentOffered) return;
+  try {
+    const { markers } = await request('addons:markers', undefined);
+    if (markers.length === 0) return;
+    const html = document.documentElement?.outerHTML ?? '';
+    if (!markers.some((marker) => html.includes(marker))) return;
+    post('doc:html', { url: location.href, html });
+    documentOffered = true;
+  } catch {
+    /* the background is not listening, or the page went away */
+  }
 }
 
 function sweep(): void {
@@ -193,7 +219,9 @@ function followNavigation(): void {
     if (location.href === current) return;
     current = location.href;
     seen.clear();
+    documentOffered = false;
     sweep();
+    void offerDocument();
   };
   addEventListener('popstate', check);
   for (const method of ['pushState', 'replaceState'] as const) {
@@ -221,6 +249,7 @@ if (document.readyState === 'loading') {
       startObserver();
       watchEncryption();
       void loadSettings();
+      void offerDocument();
       followNavigation();
     },
     { once: true },
@@ -232,5 +261,6 @@ if (document.readyState === 'loading') {
   startObserver();
   watchEncryption();
   void loadSettings();
+  void offerDocument();
   followNavigation();
 }

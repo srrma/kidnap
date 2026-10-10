@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { BUILTIN_ADDONS } from '../src/addons/builtin';
 import { AddonRegistry, applyRewrite, validateAddon } from '../src/addons/engine';
 import { pluck, read } from '../src/addons/paths';
+import { buildFilename, DEFAULT_TEMPLATE } from '../src/core/filename';
 import { consolidate } from '../src/core/quality';
 import type { AddonSpec, MediaItem } from '../src/core/types';
 
@@ -504,6 +505,8 @@ describe('validation', () => {
       'bsky',
       'twitch',
       'facebook',
+      'adobe-fonts',
+      'adobe-fonts-collections',
     ]);
     for (const addon of BUILTIN_ADDONS) {
       expect(covered.has(addon.id), `${addon.id} has no fixture test`).toBe(true);
@@ -528,5 +531,109 @@ describe('consolidate', () => {
     expect(videos[0]?.variants).toHaveLength(3);
     expect(videos[0]?.url).toContain('high.mp4');
     expect(videos[0]?.variants?.some((v) => v.url.includes('.m3u8'))).toBe(true);
+  });
+});
+
+describe('adobe fonts', () => {
+  const html = (file: string): string => {
+    /*
+     * The fixture is stored indented so it can be reviewed, and is compacted
+     * here because that is the form the server actually sends. The add-on
+     * matches on the exact bytes Adobe serves, whitespace included.
+     */
+    const stored = readFileSync(
+      fileURLToPath(new URL(`./fixtures/${file}`, import.meta.url)),
+      'utf8',
+    );
+    const body = JSON.stringify(JSON.parse(stored));
+    /*
+     * Wrapped the way the page actually serves it: the JSON sits in a script
+     * tag, preceded by unrelated markup and followed by the closing tag the
+     * add-on cuts on.
+     */
+    return `<!doctype html><html><body><script>window.x=1;</script><script>${body}</script></body></html>`;
+  };
+
+  it('reads every variation of a family from the rendered page', () => {
+    const items = new AddonRegistry(BUILTIN_ADDONS).extractText(
+      'https://fonts.adobe.com/fonts/roboto',
+      html('adobe-font-family.json'),
+      1,
+    );
+    expect(items).toHaveLength(3);
+
+    const [first] = items;
+    expect(first?.kind).toBe('font');
+    expect(first?.mime).toBe('font/woff2');
+    expect(first?.name).toBe('Roboto Thin');
+    expect(first?.caption).toBe('Roboto');
+    expect(first?.author).toBe('David Berlow');
+    expect(first?.pageUrl).toBe('https://fonts.adobe.com/fonts/roboto');
+    expect(first?.url).toContain('https://use.typekit.net/pf/tk/dwgd/n2/l?');
+    expect(first?.url).toContain('ec_token=');
+  });
+
+  it('reads every variation of a collection from the rendered page', () => {
+    const items = new AddonRegistry(BUILTIN_ADDONS).extractText(
+      'https://fonts.adobe.com/collections/laced-up',
+      html('adobe-font-collection.json'),
+      1,
+    );
+    expect(items).toHaveLength(3);
+
+    const [first] = items;
+    expect(first?.kind).toBe('font');
+    expect(first?.name).toBe('Puntino Light');
+    expect(first?.caption).toBe('Puntino');
+    /* One step out of the variation reaches the pack, which credits the team. */
+    expect(first?.author).toBe('The Adobe Type Team');
+    expect(first?.url).toContain('https://use.typekit.net/pf/tk/rtgs/n3/l?');
+  });
+
+  it('keeps families and collections apart', () => {
+    const registry = new AddonRegistry(BUILTIN_ADDONS);
+    /* A collection page must not be read as a family, or vice versa. */
+    expect(
+      registry.extractText(
+        'https://fonts.adobe.com/collections/laced-up',
+        html('adobe-font-family.json'),
+        1,
+      ),
+    ).toHaveLength(0);
+    expect(
+      registry.extractText(
+        'https://fonts.adobe.com/fonts/roboto',
+        html('adobe-font-collection.json'),
+        1,
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('gives every font a usable file name, not the CDN path', () => {
+    const [item] = new AddonRegistry(BUILTIN_ADDONS).extractText(
+      'https://fonts.adobe.com/fonts/roboto',
+      html('adobe-font-family.json'),
+      1,
+    );
+    expect(item).toBeDefined();
+    /*
+     * The URL path ends in /l, so the name has to come from the payload or
+     * every downloaded font is called "l.woff2".
+     */
+    const name = buildFilename(item as MediaItem, DEFAULT_TEMPLATE, '', 1);
+    expect(name).toBe('use.typekit.net-font-1-Roboto Thin.woff2');
+  });
+
+  it('does nothing on a page it does not recognise', () => {
+    const registry = new AddonRegistry(BUILTIN_ADDONS);
+    expect(registry.wantsDocument('https://example.com/anything')).toBe(false);
+    expect(registry.wantsDocument('https://fonts.adobe.com/fonts/roboto')).toBe(true);
+    expect(
+      registry.extractText('https://example.com/x', html('adobe-font-family.json'), 1),
+    ).toHaveLength(0);
+    /* A redesign leaves the marker missing; that must be silent, not a throw. */
+    expect(
+      registry.extractText('https://fonts.adobe.com/fonts/roboto', '<html>nope</html>', 1),
+    ).toHaveLength(0);
   });
 });

@@ -71,6 +71,12 @@ const EXTENSIONS: Record<string, MediaKind> = {
   epub: 'document',
   mobi: 'document',
   azw3: 'document',
+
+  woff2: 'font',
+  woff: 'font',
+  ttf: 'font',
+  otf: 'font',
+  eot: 'font',
 };
 
 /** Prefixes are checked in order, so the first match wins. */
@@ -95,6 +101,16 @@ const CONTENT_TYPES: readonly (readonly [string, MediaKind])[] = [
   ['application/vnd.oasis.opendocument', 'document'],
   ['application/vnd.openxmlformats-officedocument', 'document'],
   ['application/vnd.ms-', 'document'],
+  /* Adobe serves font files from an extensionless path, so the content type is
+     the only thing that identifies them. */
+  ['font/', 'font'],
+  ['application/font-woff', 'font'],
+  ['application/font-sfnt', 'font'],
+  ['application/font-ttf', 'font'],
+  ['application/x-font-ttf', 'font'],
+  ['application/x-font-opentype', 'font'],
+  ['application/vnd.ms-fontobject', 'font'],
+  ['application/font-woff2', 'font'],
 ];
 
 const MANIFEST = /\.m3u8?$|\.mpd$|\.m4s$|\.cmf[av]$/i;
@@ -201,6 +217,11 @@ export function guessMime(url: string): string | undefined {
     txt: 'text/plain',
     json: 'application/json',
     xml: 'application/xml',
+    woff2: 'font/woff2',
+    woff: 'font/woff',
+    ttf: 'font/ttf',
+    otf: 'font/otf',
+    eot: 'application/vnd.ms-fontobject',
   };
   return table[ext];
 }

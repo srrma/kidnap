@@ -1,0 +1,451 @@
+{
+  "family": {
+    "slug": "roboto",
+    "name": "Roboto",
+    "matched_font_count": 18,
+    "favorite": false,
+    "public_at": "2016-01-08T01:33:12Z",
+    "filters": [
+      "cl:ss",
+      "cp:ul",
+      "ct:l",
+      "ns:uc",
+      "st:d",
+      "wd:r",
+      "wt:h",
+      "wt:l",
+      "wt:r",
+      "xh:h"
+    ],
+    "language_support": [
+      "be",
+      "bg",
+      "ca",
+      "cs",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "fi",
+      "fil",
+      "fr",
+      "hr",
+      "hu",
+      "id",
+      "it",
+      "kk",
+      "mk",
+      "ms",
+      "mt",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "ro",
+      "ru",
+      "sk",
+      "sl",
+      "sr",
+      "sv",
+      "tr",
+      "uk",
+      "uz",
+      "vi"
+    ],
+    "has_open_source_fonts": true,
+    "adobe_type_concept": false,
+    "has_color_font_info": false,
+    "adobe_encoding": [],
+    "default_glyph_style": [],
+    "fontpacks": [],
+    "character_standards_with_default_language": [],
+    "total_font_count": 18,
+    "description": "Roboto has a dual nature. It has a mechanical skeleton and the forms are largely geometric. At the same time, the font features friendly and open curves. While some grotesks distort their letterforms to force a rigid rhythm, Roboto doesn’t compromise, allowing letters to be settled into their natural width. This makes for a more natural reading rhythm more commonly found in humanist and serif types.\r\n\r\nRoboto is part of a superfamily set that includes Roboto Slab and Roboto Mono",
+    "designers": [
+      {
+        "name": "David Berlow",
+        "slug": "david-berlow"
+      }
+    ],
+    "foundry": {
+      "name": "Google"
+    },
+    "font_slugs_by_availability": {
+      "added": [],
+      "favorited": [],
+      "purchased": [],
+      "in_plan": [
+        "roboto-thin",
+        "roboto-thin-italic",
+        "roboto-extralight-extralight-62367",
+        "roboto-extralight-extralight-italic-62366",
+        "roboto-light",
+        "roboto-light-italic",
+        "roboto-regular",
+        "roboto-italic",
+        "roboto-medium",
+        "roboto-medium-italic",
+        "roboto-semibold-62365",
+        "roboto-semibold-italic-62363",
+        "roboto-bold",
+        "roboto-bold-italic",
+        "roboto-extrabold-62364",
+        "roboto-extrabold-italic-62362",
+        "roboto-black",
+        "roboto-black-italic"
+      ],
+      "require_upgrade": [],
+      "require_purchase": []
+    },
+    "card_state": {
+      "count_messages": ["18 fonts"],
+      "toggle_control": {
+        "message": "Activate fonts",
+        "value": false
+      },
+      "activated_font_count": 0
+    },
+    "fonts": [
+      {
+        "name": "Roboto Thin",
+        "variation_name": "Thin",
+        "preferred_family_name": "Roboto",
+        "family": {
+          "slug": "roboto",
+          "web_id": "dwgd"
+        },
+        "font": {
+          "web": {
+            "fvd": "n2"
+          }
+        }
+      },
+      {
+        "name": "Roboto Thin Italic",
+        "variation_name": "Thin Italic",
+        "preferred_family_name": "Roboto",
+        "family": {
+          "slug": "roboto",
+          "web_id": "dwgd"
+        },
+        "font": {
+          "web": {
+            "fvd": "i2"
+          }
+        }
+      },
+      {
+        "name": "Roboto ExtraLight",
+        "variation_name": "ExtraLight",
+        "preferred_family_name": "Roboto",
+        "family": {
+          "slug": "roboto",
+          "web_id": "ncgf"
+        },
+        "font": {
+          "web": {
+            "fvd": "n2"
+          }
+        }
+      }
+    ],
+    "display_font": {
+      "id": 15511,
+      "favorite": false,
+      "family": {
+        "web_id": "dwgd",
+        "name": "Roboto",
+        "slug": "roboto",
+        "web_name": "Roboto",
+        "css_font_stack": "\"roboto\",sans-serif",
+        "foundry": {
+          "name": "Google"
+        },
+        "typographic_family_name": "Roboto"
+      },
+      "name": "Roboto Thin",
+      "rtl": false,
+      "default_language": "en",
+      "slug": "roboto-thin",
+      "tags": [
+        {
+          "id": "sans",
+          "font_sort_order": 807
+        },
+        {
+          "id": "neo-grotesque",
+          "font_sort_order": 0
+        },
+        {
+          "id": "clean",
+          "font_sort_order": 528
+        },
+        {
+          "id": "professional",
+          "font_sort_order": 0
+        },
+        {
+          "id": "corporate",
+          "font_sort_order": 0
+        },
+        {
+          "id": "healthcare",
+          "font_sort_order": 0
+        },
+        {
+          "id": "research",
+          "font_sort_order": 0
+        },
+        {
+          "id": "official",
+          "font_sort_order": 0
+        },
+        {
+          "id": "support",
+          "font_sort_order": 0
+        },
+        {
+          "id": "wellness",
+          "font_sort_order": 0
+        },
+        {
+          "id": "tech",
+          "font_sort_order": 0
+        },
+        {
+          "id": "sans-serif",
+          "font_sort_order": 0
+        },
+        {
+          "id": "neo-grotesque",
+          "font_sort_order": 0
+        },
+        {
+          "id": "2010s",
+          "font_sort_order": 0
+        },
+        {
+          "id": "job-fair",
+          "font_sort_order": 0
+        },
+        {
+          "id": "clean",
+          "font_sort_order": 528
+        },
+        {
+          "id": "professional",
+          "font_sort_order": 0
+        },
+        {
+          "id": "corporate",
+          "font_sort_order": 0
+        },
+        {
+          "id": "healthcare",
+          "font_sort_order": 0
+        },
+        {
+          "id": "meetings",
+          "font_sort_order": 0
+        },
+        {
+          "id": "academic",
+          "font_sort_order": 0
+        },
+        {
+          "id": "research",
+          "font_sort_order": 0
+        },
+        {
+          "id": "official",
+          "font_sort_order": 0
+        },
+        {
+          "id": "support",
+          "font_sort_order": 0
+        },
+        {
+          "id": "wellness",
+          "font_sort_order": 0
+        },
+        {
+          "id": "tech",
+          "font_sort_order": 0
+        },
+        {
+          "id": "sans-serif",
+          "font_sort_order": 0
+        },
+        {
+          "id": "2010s",
+          "font_sort_order": 0
+        },
+        {
+          "id": "job-fair",
+          "font_sort_order": 0
+        },
+        {
+          "id": "meetings",
+          "font_sort_order": 0
+        },
+        {
+          "id": "academic",
+          "font_sort_order": 0
+        },
+        {
+          "id": "swiss-style",
+          "font_sort_order": 0
+        }
+      ],
+      "font": {
+        "sync": {
+          "font_id": "TkD-15511-fb3e313d571194aac6cc4a086f754f6d08259dfe",
+          "required_action": [],
+          "type": "ttf",
+          "install_state": "",
+          "is_selected": false,
+          "optical_size": null,
+          "language_support": [
+            "de",
+            "es",
+            "nl",
+            "en",
+            "pl",
+            "ru",
+            "fr",
+            "cs",
+            "sv",
+            "pt",
+            "ca",
+            "it",
+            "sl",
+            "mt",
+            "el",
+            "tr",
+            "hu",
+            "vi",
+            "be",
+            "da",
+            "mk",
+            "uk",
+            "no",
+            "sr",
+            "fi",
+            "fil",
+            "ms",
+            "hr",
+            "kk",
+            "ro",
+            "id",
+            "sk",
+            "bg",
+            "uz"
+          ],
+          "weight": 250,
+          "library_availability": {
+            "full": true,
+            "trial": true
+          }
+        },
+        "web": {
+          "font_id": "TkW-15511-f768c474256d1976f79441a80a5a207cd566c00c",
+          "fvd": "n2",
+          "required_action": [],
+          "type": "ttf",
+          "optical_size": null,
+          "language_support": [
+            "de",
+            "es",
+            "nl",
+            "en",
+            "pl",
+            "ru",
+            "fr",
+            "cs",
+            "sv",
+            "pt",
+            "ca",
+            "it",
+            "sl",
+            "mt",
+            "el",
+            "tr",
+            "hu",
+            "vi",
+            "be",
+            "da",
+            "mk",
+            "uk",
+            "no",
+            "sr",
+            "fi",
+            "fil",
+            "ms",
+            "hr",
+            "kk",
+            "ro",
+            "id",
+            "sk",
+            "bg",
+            "uz"
+          ],
+          "weight": 200,
+          "library_availability": {
+            "full": true,
+            "trial": true
+          },
+          "sample_text_features": "\"calt\",\"ccmp\",\"clig\",\"curs\",\"liga\",\"locl\",\"mark\",\"mkmk\",\"rclt\",\"rlig\",\"rvrn\""
+        }
+      },
+      "sort_order": 0,
+      "filters": ["st:d", "cl:ss", "wt:l", "wd:r", "xh:h", "ct:l", "cp:ul", "ns:uc"],
+      "postscript_name": "Roboto-Thin",
+      "preferred_family_name": "Roboto",
+      "variation_name": "Thin",
+      "preferred_subfamily_name": "Thin",
+      "is_variable_font": false,
+      "localized_names": {
+        "en_US": "Roboto Thin"
+      },
+      "localized_family_name": {
+        "en_US": "Roboto"
+      },
+      "localized_subfamily_name": {
+        "en_US": "Thin"
+      },
+      "preview_text": {},
+      "designers": [
+        {
+          "slug": "david-berlow",
+          "name": "David Berlow"
+        },
+        {
+          "slug": "christian-robertson",
+          "name": "Christian Robertson"
+        }
+      ]
+    },
+    "has_variable_font": false,
+    "specimen_images_data": [
+      {
+        "key": "Mv4mRGCfYdLjkhxFAhxw18an",
+        "type": "jpg",
+        "url": "https://assets.fonts.adobe.com/Mv4mRGCfYdLjkhxFAhxw18an",
+        "url_largest": "https://assets.fonts.adobe.com/800x400/Mv4mRGCfYdLjkhxFAhxw18an"
+      },
+      {
+        "key": "yB7b364ZeRAUvf5m57QeY13S",
+        "type": "jpg",
+        "url": "https://assets.fonts.adobe.com/yB7b364ZeRAUvf5m57QeY13S",
+        "url_largest": "https://assets.fonts.adobe.com/800x400/yB7b364ZeRAUvf5m57QeY13S"
+      },
+      {
+        "key": "JoPGir8XgQWNFTdYHGVospcf",
+        "type": "jpg",
+        "url": "https://assets.fonts.adobe.com/JoPGir8XgQWNFTdYHGVospcf",
+        "url_largest": "https://assets.fonts.adobe.com/800x400/JoPGir8XgQWNFTdYHGVospcf"
+      }
+    ]
+  }
+}

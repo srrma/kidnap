@@ -7,6 +7,7 @@
  */
 
 import { request } from '../bus/protocol';
+import { buildFilename, DEFAULT_TEMPLATE } from '../core/filename';
 import { consolidate, sortItems, totalBytes } from '../core/quality';
 import type {
   DirectJob,
@@ -19,6 +20,7 @@ import type {
 import { displayHost, fileNameOf } from '../core/url';
 import { activeTabId, api, supportsSidePanel } from '../platform';
 import { bytes, clear, duration, el, toast } from './dom';
+import { saveFontAsTtf } from './font';
 import { openPreview } from './preview';
 import { openSettings } from './settings';
 import { cached, posterSource, releaseAll, request as requestPoster } from './thumbnails';
@@ -32,6 +34,7 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'audio', label: 'Audio' },
   { id: 'stream', label: 'Streams' },
   { id: 'document', label: 'Files' },
+  { id: 'font', label: 'Fonts' },
 ];
 
 interface State {
@@ -76,7 +79,7 @@ const renderedRows = new Map<string, HTMLElement>();
  * opens this page as an ordinary tab instead.
  */
 
-/* Firefox has no offscreen document, so assembly runs here instead. */
+/* Firefox has no offscreen document, so assembly and font conversion run here. */
 if (!supportsSidePanel() || !api.offscreen) {
   void import('../offscreen/assemble').then((module) => module.startAssembling());
 }
@@ -143,6 +146,7 @@ function counts(rows: MediaItem[]): Record<Filter, number> {
     audio: 0,
     stream: 0,
     document: 0,
+    font: 0,
   };
   for (const item of rows) {
     base.all += 1;
@@ -526,6 +530,7 @@ const KIND_LABELS: Record<string, string> = {
   stream: 'STREAM',
   document: 'FILE',
   image: 'IMAGE',
+  font: 'FONT',
 };
 
 /** A small play mark, so a poster reads as video without relying on its frame. */
@@ -651,7 +656,53 @@ function actions(item: MediaItem): HTMLElement {
     [item.protected ? 'Protected' : item.kind === 'stream' ? 'Assemble' : 'Save'],
   );
 
-  return el('div', { class: 'row-actions' }, [copy, save]);
+  /*
+   * A web font is offered twice: as the file the server sent, and as a plain
+   * TrueType one. Windows will not install WOFF2, so the second is the one
+   * most people actually want, but the first is the byte-exact original.
+   */
+  const ttf =
+    item.kind === 'font' && !item.protected && supportsFontConversion()
+      ? el(
+          'button',
+          {
+            class: 'button',
+            type: 'button',
+            title: 'Save as TrueType, which Windows can install',
+            'aria-label': `Save ${item.name ?? item.url} as TrueType`,
+            onClick: () => void saveAsTtf(item),
+          },
+          ['TTF'],
+        )
+      : null;
+
+  return el('div', { class: 'row-actions' }, ttf ? [copy, save, ttf] : [copy, save]);
+}
+
+/**
+ * The sandboxed converter only exists where the manifest declares one, which
+ * Firefox's does not. Offering a button that cannot work is worse than not
+ * offering it.
+ */
+function supportsFontConversion(): boolean {
+  return Array.isArray(api.runtime.getManifest().sandbox?.pages);
+}
+
+async function saveAsTtf(item: MediaItem): Promise<void> {
+  const filename = buildFilename(
+    item,
+    state.settings?.filenameTemplate ?? DEFAULT_TEMPLATE,
+    state.settings?.folder ?? '',
+    1,
+  );
+  try {
+    await saveFontAsTtf(item.url, filename);
+  } catch (error) {
+    console.warn('[kidnap] font conversion failed', error);
+    /* A failed conversion is worth saying out loud: the button did nothing
+       visible otherwise, and the usual causes are all user-fixable. */
+    toast(error instanceof Error ? error.message : 'The font could not be converted.');
+  }
 }
 
 export function describeItem(item: MediaItem): string {

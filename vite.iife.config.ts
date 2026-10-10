@@ -13,6 +13,7 @@ const entry = process.env.KIDNAP_ENTRY ?? 'content';
 const inputs = {
   content: resolve(import.meta.dirname, 'src/content/index.ts'),
   'page-hook': resolve(import.meta.dirname, 'src/content/page-hook.ts'),
+  sandbox: resolve(import.meta.dirname, 'src/sandbox/convert.ts'),
 } as const;
 
 export default defineConfig({
@@ -33,7 +34,11 @@ export default defineConfig({
       entry: inputs[entry as keyof typeof inputs] ?? inputs.content,
       formats: ['iife'],
       name: 'kidnap',
-      fileName: () => (entry === 'page-hook' ? 'page-hook.js' : 'content/index.js'),
+      fileName: () => {
+        if (entry === 'page-hook') return 'page-hook.js';
+        if (entry === 'sandbox') return 'sandbox/convert.js';
+        return 'content/index.js';
+      },
     },
   },
 });

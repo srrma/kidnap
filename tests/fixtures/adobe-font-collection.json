@@ -1,0 +1,39 @@
+{
+  "fontpack": {
+    "all_valid_slugs": ["laced-up"],
+    "name": "Laced Up",
+    "contributor_credit": "The Adobe Type Team",
+    "font_variations": [
+      {
+        "opaque_id": "rtgs",
+        "fvd": "n3",
+        "full_display_name": "Puntino Light",
+        "variation_name": "Light",
+        "family": {
+          "slug": "puntino",
+          "name": "Puntino"
+        }
+      },
+      {
+        "opaque_id": "rtgs",
+        "fvd": "n4",
+        "full_display_name": "Puntino Regular",
+        "variation_name": "Regular",
+        "family": {
+          "slug": "puntino",
+          "name": "Puntino"
+        }
+      },
+      {
+        "opaque_id": "rtgs",
+        "fvd": "n7",
+        "full_display_name": "Puntino Bold",
+        "variation_name": "Bold",
+        "family": {
+          "slug": "puntino",
+          "name": "Puntino"
+        }
+      }
+    ]
+  }
+}

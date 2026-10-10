@@ -59,7 +59,10 @@ caching them would cost storage to avoid work that is cheap to repeat.
 
 ## Add-on coverage
 
-Add-ons read JSON APIs only. Two things this version does not attempt:
+Add-ons read a JSON API, or, where a site offers no API that may be called,
+JSON that the site renders into its own page. Adobe Fonts is the second kind:
+its catalogue is in a script tag, and an add-on declares where that starts and
+ends. Two things this version still does not attempt:
 
 - **Page globals.** Bandcamp exposes track data on `window.TralbumData`. Reading
   it would need a page-world scraper, which is a second extension point.
@@ -69,6 +72,13 @@ Add-ons read JSON APIs only. Two things this version does not attempt:
 
 Both are the kind of thing that works until it does not. They are documented as
 missing rather than shipped and quietly broken.
+
+## Fonts on Firefox
+
+A web font can be saved exactly as the server sent it everywhere, which is what
+the Save button does. Saving it as TrueType needs the sandboxed converter, and
+Firefox does not implement the manifest sandbox the way Chromium does, so the
+TTF button is not offered there rather than offered and broken.
 
 ## Noise filtering
 

@@ -6,6 +6,14 @@
  * module, so the fallback is the import below rather than a second
  * implementation.
  */
+import { post } from '../bus/protocol';
 import { startAssembling } from './assemble';
 
 startAssembling();
+
+/*
+ * Creating the document returns before its script has run, so anything posted
+ * straight afterwards arrives before there is a listener for it. Saying hello
+ * once both are installed is what lets the background wait rather than hope.
+ */
+post('offscreen:ready', undefined);

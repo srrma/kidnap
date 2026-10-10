@@ -47,7 +47,32 @@ worst it can do is produce rows you did not want.
 | `hosts` | Which hosts this applies to. `example.com` matches `example.com` and every subdomain. `*.example.com` matches subdomains only. Matching is on label boundaries, so `example.com` never matches `notexample.com`. |
 | `apiPaths` | URL path prefixes worth reading a body from. Leave it out to watch every path on those hosts. |
 | `rewrite` | Optional URL upgrades. |
+| `embedded` | Optional. Where the JSON sits inside an HTML page. |
 | `rules` | Where the media is inside a response. |
+
+### `embedded`
+
+Some sites have no API you are allowed to call, and render the whole thing into
+the page instead. Adobe Fonts puts its entire catalogue in a script tag. An
+add-on that declares `embedded` says where that starts and ends:
+
+```json
+"embedded": { "start": "{\"family\":{\"slug\":\"", "end": "</script>" }
+```
+
+The body is cut from `start` up to `end` and parsed as JSON, then the rules run
+against it exactly as they would against a fetched response. A page that does
+not contain the marker is skipped silently, which is what happens after every
+site redesign.
+
+The match is on exact bytes, whitespace included, because that is what the
+server sends. A marker written against a prettified copy of the page will never
+match the real thing.
+
+Sending a page is not free, so it only happens when the marker is actually
+present: the content script asks for the markers once and tests them against the
+markup it already holds, and the page is only posted on a match. A normal page
+costs one small message and nothing else.
 
 ### `rewrite`
 
@@ -79,6 +104,21 @@ Paths are read from the match.
 The absolute form exists because a real response often keeps the post in one
 branch and the media in another, and no chain of ancestors reaches across two
 branches of a tree.
+
+`url` is the one field that may be built rather than read, when the payload
+carries the parts of a URL but not the URL:
+
+```json
+"url": {
+  "template": "https://cdn.example/{kit}/{id}/l",
+  "values": { "kit": "family.web_id", "id": "font.web.fvd" }
+}
+```
+
+Each `{name}` is replaced by the value `values[name]` points at. A placeholder
+with no matching entry is an error at load time, and a value that resolves to
+nothing means the rule is skipped rather than a URL being fetched with a
+literal `{kit}` in it.
 
 Media fields: `url` (required), `mime`, `bytes`, `width`, `height`, `label`,
 `duration`, `bitrate`, `codecs`, `group`, `thumbnail`, `title`, `author`,
@@ -200,5 +240,5 @@ simply matches nothing is accepted and stays quiet.
 - Cannot scrape a client id out of a JavaScript bundle.
 - Cannot download anything. They produce rows; saving is a separate step.
 
-Those last three are real gaps, and they are the reason some sites are not
-supported. See [LIMITATIONS.md](LIMITATIONS.md).
+Those are real gaps, and they are the reason some sites are not supported. See
+[LIMITATIONS.md](LIMITATIONS.md).

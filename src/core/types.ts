@@ -4,7 +4,7 @@
  * type that is allowed to disagree with the first.
  */
 
-export type MediaKind = 'image' | 'video' | 'audio' | 'stream' | 'document';
+export type MediaKind = 'image' | 'video' | 'audio' | 'stream' | 'document' | 'font';
 
 /** Which detector produced this row. Provenance, not identity. */
 export type Detector = 'network' | 'dom' | 'addon';
@@ -164,6 +164,13 @@ export interface AddonSpec {
   apiPaths?: string[];
   /** Upgrade an intercepted URL to a better variant of the same file. */
   rewrite?: RewriteSpec[];
+  /**
+   * Some sites do not have an API to read; they render the data into the
+   * HTML. This says where the JSON sits inside that HTML: the body is cut from
+   * `start` up to `end`, and what remains is parsed as JSON and handed to the
+   * rules like any other payload.
+   */
+  embedded?: { start: string; end: string };
   rules: RuleSpec[];
 }
 
@@ -203,8 +210,19 @@ export interface ConditionSpec {
   absent?: boolean;
 }
 
+/**
+ * Most media URLs are in the payload. Some have to be assembled from ids the
+ * payload does carry, in which case each `{name}` in the template is replaced
+ * by the value `values[name]` points at. A template with an unresolved
+ * placeholder is rejected rather than fetched.
+ */
+export interface UrlTemplate {
+  template: string;
+  values: Record<string, PathValue>;
+}
+
 export interface MediaSpec {
-  url: PathValue;
+  url: PathValue | UrlTemplate;
   /** The rule is skipped unless this holds, which is how one rule is kept
    *  from claiming media of a kind it was not written for. */
   when?: ConditionSpec;

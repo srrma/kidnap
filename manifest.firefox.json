@@ -27,5 +27,6 @@
       "resources": ["page-hook.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "sandbox": null
 }

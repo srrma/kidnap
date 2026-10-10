@@ -8,7 +8,7 @@
  * document, in the panel page itself.
  */
 
-import { on, post, request } from '../bus/protocol';
+import { on, post } from '../bus/protocol';
 import { buildFilename } from '../core/filename';
 import { jobId } from '../core/hash';
 import { classify } from '../core/kind';
@@ -30,21 +30,54 @@ let creatingOffscreen: Promise<void> | null = null;
  * so a long assembly keeps going. Chrome allows exactly one per extension,
  * which is why creation is shared rather than per job.
  */
+let offscreenAnnounced = false;
+let waitingForOffscreen: Array<() => void> = [];
+
+on('offscreen:ready', () => {
+  console.log('[trace] offscreen announced ready');
+  offscreenAnnounced = true;
+  for (const wake of waitingForOffscreen) wake();
+  waitingForOffscreen = [];
+});
+
+/**
+ * Resolves once the offscreen document says its listeners exist.
+ *
+ * Creating the document returns before its script has run, so work posted
+ * straight afterwards is dropped: there is nothing listening for it yet. The
+ * wait is capped so a document that fails to announce itself is a slow job
+ * rather than a job that never starts.
+ */
+function whenOffscreenReady(): Promise<void> {
+  if (offscreenAnnounced) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const wake = (): void => resolve();
+    waitingForOffscreen.push(wake);
+    setTimeout(wake, 1500);
+  });
+}
+
 async function ensureOffscreen(): Promise<void> {
   if (!supportsOffscreen()) return;
-  if (await api.offscreen.hasDocument?.()) return;
+  const exists = await api.offscreen.hasDocument?.();
+  if (exists) {
+    await whenOffscreenReady();
+    return;
+  }
 
   creatingOffscreen ??= api.offscreen
     .createDocument({
       url: api.runtime.getURL('offscreen/index.html'),
       reasons: [api.offscreen.Reason.BLOBS],
-      justification: 'Assembling a segmented media stream into a single file',
+      justification: 'Producing a downloadable file from a stream or a web font',
     })
     .finally(() => {
       creatingOffscreen = null;
     });
 
   await creatingOffscreen;
+  offscreenAnnounced = false;
+  await whenOffscreenReady();
 }
 
 /* ── Direct files ────────────────────────────────────────────────────────── */
@@ -249,6 +282,12 @@ export function wireJobs(context: JobContext): void {
       return { jobId: await enqueueStream(item, settings, choice) };
     });
 
+    /*
+     * A font saved as TTF is a short job rather than a queued one: the
+     * conversion is a repackaging that finishes in milliseconds, so it runs
+     * immediately and reports back when it is done. It runs in the offscreen
+     * document so closing the panel mid-conversion loses nothing.
+     */
     on('stream:choose', async ({ jobId: streamId, index }) => {
       post('assemble:choose', { jobId: streamId, index });
       await updateStream(streamId, { chosen: index });
@@ -298,5 +337,3 @@ function describeError(error: unknown): string {
   const text = String(error);
   return text.includes('ETELEMETRY') ? 'The site refused the connection' : text;
 }
-
-export { request };

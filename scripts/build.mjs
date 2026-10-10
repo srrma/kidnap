@@ -51,6 +51,11 @@ build(
   'iife build (page hook)',
   { KIDNAP_ENTRY: 'page-hook' },
 );
+build(
+  ['vite', 'build', '-c', 'vite.iife.config.ts', ...(watch ? ['--watch'] : [])],
+  'iife build (sandboxed font converter)',
+  { KIDNAP_ENTRY: 'sandbox' },
+);
 
 const manifest =
   target === 'firefox'
@@ -59,9 +64,30 @@ const manifest =
 manifest.version = readJson('package.json').version;
 
 cpSync(resolve(root, 'icons'), resolve(dist, 'icons'), { recursive: true });
+/*
+ * The sandbox page's markup is hand written and deliberately not part of the
+ * bundler's inputs, because the converter beside it has to stay one classic
+ * script rather than a module.
+ */
+cpSync(resolve(root, 'src/sandbox/convert.html'), resolve(dist, 'sandbox/convert.html'));
+/*
+ * The emscripten binding is copied verbatim rather than bundled. It is asm.js
+ * that expects to be a script in its own right; inlined into a bundle its
+ * runtime never initialises and the conversion hangs with no error.
+ */
+cpSync(
+  resolve(root, 'node_modules/wawoff2/build/decompress_binding.js'),
+  resolve(dist, 'sandbox/decompress_binding.js'),
+);
 writeFileSync(resolve(dist, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 
-const required = ['manifest.json', 'background/index.js', 'content/index.js', 'page-hook.js'];
+const required = [
+  'manifest.json',
+  'background/index.js',
+  'content/index.js',
+  'page-hook.js',
+  'sandbox/convert.js',
+];
 const missing = required.filter((file) => !existsSync(resolve(dist, file)));
 if (missing.length > 0) {
   console.error(`build incomplete, missing: ${missing.join(', ')}`);

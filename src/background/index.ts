@@ -8,7 +8,7 @@
 import { BUILTIN_ADDONS } from '../addons/builtin';
 import { AddonRegistry, validateAddon } from '../addons/engine';
 import { on, post, request } from '../bus/protocol';
-import type { AddonSpec, Settings } from '../core/types';
+import type { AddonSpec, MediaItem, Settings } from '../core/types';
 import { api } from '../platform';
 import { load as loadSettings, onChange, save as saveSettings } from '../store/settings';
 import * as store from '../store/tab';
@@ -17,6 +17,7 @@ import { build, type Report } from './ingest';
 import { wireJobs } from './jobs';
 import { registerMenu } from './menu';
 import { inspect } from './sniff';
+import { isNavigation } from './tabreset';
 
 let settings: Settings = {
   filenameTemplate: '{site}-{kind}-{index}-{name}.{ext}',
@@ -54,10 +55,24 @@ onChange((next) => {
 /* ── Detection ───────────────────────────────────────────────────────────── */
 
 async function record(tabId: number, report: Report): Promise<boolean> {
-  const item = build(report, tabId, settings, Date.now(), (url) => addons.rewrite(url));
-  if (!item) return false;
+  let item: MediaItem | null;
+  try {
+    item = build(report, tabId, settings, Date.now(), (url) => addons.rewrite(url));
+  } catch {
+    /* A throw here loses the item silently, which is how the font path went
+       missing for a while. Counted rather than swallowed. */
+    diag.rejected += 1;
+    return false;
+  }
+  if (!item) {
+    diag.rejected += 1;
+    return false;
+  }
   const added = await store.add(tabId, item);
-  if (added) scheduleBadge(tabId);
+  if (added) {
+    diag.stored += 1;
+    scheduleBadge(tabId);
+  }
   return added;
 }
 
@@ -108,13 +123,52 @@ on('hook:media', (payload, sender) => {
  * it broke, nothing was visible anywhere: the panel simply showed fewer rows.
  * These make the hop that dropped a message readable from the harness.
  */
-const diag = { apiBody: 0, noTab: 0, notClaimed: 0, badJson: 0, items: 0 };
+const diag = {
+  apiBody: 0,
+  noTab: 0,
+  notClaimed: 0,
+  badJson: 0,
+  items: 0,
+  rejected: 0,
+  stored: 0,
+};
 (globalThis as unknown as { __kidnapDiag: typeof diag }).__kidnapDiag = diag;
+
+function tabIdOf(sender: chrome.runtime.MessageSender): number | undefined {
+  const tabId = sender.tab?.id;
+  return tabId === undefined || tabId < 0 ? undefined : tabId;
+}
+
+/**
+ * Files what an add-on found. The add-on has already resolved every field it
+ * knows, so all of it is carried through to storage rather than the handful
+
+ */
+function absorb(tabId: number, items: MediaItem[]): void {
+  diag.items += items.length;
+  for (const item of items) {
+    void record(tabId, {
+      url: item.url,
+      detector: 'addon',
+      mime: item.mime,
+      bytes: item.bytes,
+      width: item.width,
+      height: item.height,
+      name: item.name,
+      alt: item.alt,
+      author: item.author,
+      caption: item.caption,
+      published: item.published,
+      postId: item.postId,
+      pageUrl: item.pageUrl,
+    });
+  }
+}
 
 on('api:body', (payload, sender) => {
   diag.apiBody += 1;
-  const tabId = sender.tab?.id;
-  if (tabId === undefined || tabId < 0) {
+  const tabId = tabIdOf(sender);
+  if (tabId === undefined) {
     diag.noTab += 1;
     return;
   }
@@ -131,30 +185,24 @@ on('api:body', (payload, sender) => {
     return;
   }
 
-  const extracted = addons.extract(payload.url, body, tabId);
-  diag.items += extracted.length;
-  for (const item of extracted) {
-    void record(tabId, {
-      url: item.url,
-      detector: 'addon',
-      mime: item.mime,
-      bytes: item.bytes,
-      width: item.width,
-      height: item.height,
-      name: item.name,
-      alt: item.alt,
-      /*
-       * The add-on resolved these and they were being dropped here, so the
-       * panel and the saved filename never saw the author or the caption.
-       */
-      author: item.author,
-      caption: item.caption,
-      published: item.published,
-      postId: item.postId,
-      pageUrl: item.pageUrl,
-    });
-  }
+  absorb(tabId, addons.extract(payload.url, body, tabId));
 });
+
+on('doc:html', (payload, sender) => {
+  diag.apiBody += 1;
+  const tabId = tabIdOf(sender);
+  if (tabId === undefined) {
+    diag.noTab += 1;
+    return;
+  }
+  if (!addons.wantsDocument(payload.url)) {
+    diag.notClaimed += 1;
+    return;
+  }
+  absorb(tabId, addons.extractText(payload.url, payload.html, tabId));
+});
+
+on('addons:markers', () => ({ markers: addons.documentMarkers() }));
 
 on('drm:seen', (_payload, sender) => {
   const tabId = sender.tab?.id;
@@ -203,7 +251,7 @@ api.tabs.onRemoved.addListener((tabId) => {
 });
 
 api.tabs.onUpdated.addListener((tabId, change) => {
-  if (change.status !== 'loading') return;
+  if (!isNavigation(change)) return;
   /* A navigation makes every previously captured URL a different page. */
   void store.clear(tabId);
   scheduleBadge(tabId);

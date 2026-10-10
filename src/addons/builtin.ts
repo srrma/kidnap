@@ -12,10 +12,11 @@
  * field of the variant, `^id` belongs to the media that owns it, and `^^^^id`
  * reaches the post.
  *
- * Scope note: these cover JSON APIs only. Reading media out of a page global
- * such as Bandcamp's TralbumData, or scraping a client id out of a JavaScript
- * bundle, is a different extension point and is deliberately not attempted
- * here. See LIMITATIONS.md.
+ * Scope note: these read either a JSON API or, where a site has no API anyone
+ * may call, JSON that the site renders into its own page. Reading a page
+ * global such as Bandcamp's TralbumData, or scraping a client id out of a
+ * JavaScript bundle, is still a different extension point and is deliberately
+ * not attempted here. See LIMITATIONS.md.
  */
 
 import type { AddonSpec, MediaSpec, RuleSpec } from '../core/types';
@@ -155,6 +156,20 @@ const xRules: RuleSpec[] = [
     { at: `${prefix}.extended_entities.media[]`, media: X_PHOTO_NESTED },
   ]),
 ];
+
+/*
+ * The font file URL, in the form Adobe's own web embed kit uses.
+ *
+ * The ec_token is required: without it the CDN answers 403. Adobe publishes it
+ * for exactly this purpose and TypeRip, which does the same job outside the
+ * browser, carries the same string. Verified 2026-02-18 against a family page
+ * (75,652 bytes) and a collection page (287,204 bytes), both application/font-woff2.
+ *
+ * If Adobe ever rotates it, this is the one line to change, and the URL shape
+ * around it is unaffected.
+ */
+const ADOBE_FONT_URL =
+  'https://use.typekit.net/pf/tk/{kit}/{fvd}/l?unicode=AAAAAQAAAAEAAAAB&features=ALL&v=3&ec_token=3bb2a6e53c9684ffdc9a9bf71d5b2a620e68abb153386c46ebe547292f11a96176a59ec4f0c7aacfef2663c08018dc100eedf850c284fb72392ba910777487b32ba21c08cc8c33d00bda49e7e2cc90baff01835518dde43e2e8d5ebf7b76545fc2687ab10bc2b0911a141f3cf7f04f3cac438a135f';
 
 export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   {
@@ -404,6 +419,72 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
           postId: 'id',
           postUrl: { template: 'https://www.facebook.com/watch/?v={id}', values: { id: 'id' } },
           timeFormat: 'epoch-seconds',
+        },
+      },
+    ],
+  },
+  {
+    /*
+     * Adobe Fonts has no catalogue API that anyone may call. It renders the
+     * whole family or collection into a script tag in the page instead, which
+     * is why this one reads `embedded` rather than an API response.
+     *
+     * The file URL is not in the payload either. It is assembled from two ids:
+     * the kit the font belongs to, and the "font variation descriptor" that
+     * names the weight and style. Both come from different places depending on
+     * whether the page is a family or a collection, hence two rules.
+     */
+    id: 'adobe-fonts',
+    name: 'Adobe Fonts',
+    hosts: ['fonts.adobe.com'],
+    /* Only family pages. Claiming collections too would let one rule set read
+       the other's payload whenever a marker happened to line up. */
+    apiPaths: ['/fonts/'],
+    embedded: { start: '{"family":{"slug":"', end: '</script>' },
+    rules: [
+      {
+        at: 'family.fonts[]',
+        media: {
+          url: {
+            template: ADOBE_FONT_URL,
+            values: { kit: 'family.web_id', fvd: 'font.web.fvd' },
+          },
+          mime: { literal: 'font/woff2' },
+          title: 'name',
+          caption: 'preferred_family_name',
+          /* The designer belongs to the family, one step out from the font. */
+          author: '^designers[0].name',
+          postId: 'family.slug',
+          postUrl: {
+            template: 'https://fonts.adobe.com/fonts/{slug}',
+            values: { slug: 'family.slug' },
+          },
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'adobe-fonts-collections',
+    name: 'Adobe Fonts collections',
+    hosts: ['fonts.adobe.com'],
+    apiPaths: ['/collections/'],
+    embedded: { start: '{"fontpack":{"all_valid_slugs":', end: '</script>' },
+    rules: [
+      {
+        at: 'fontpack.font_variations[]',
+        media: {
+          url: { template: ADOBE_FONT_URL, values: { kit: 'opaque_id', fvd: 'fvd' } },
+          mime: { literal: 'font/woff2' },
+          title: 'full_display_name',
+          caption: 'family.name',
+          /* One step out of the variation lands on the pack. */
+          author: '^contributor_credit',
+          postId: 'family.slug',
+          postUrl: {
+            template: 'https://fonts.adobe.com/fonts/{slug}',
+            values: { slug: 'family.slug' },
+          },
         },
       },
     ],

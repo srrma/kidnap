@@ -16,6 +16,7 @@ import type {
   MediaSpec,
   RewriteSpec,
   RuleSpec,
+  UrlTemplate,
 } from '../core/types';
 import { hostMatches, hostMatchesAny, parse, pathMatches } from '../core/url';
 import { pluck, read, readNumber, readString, type Scope } from './paths';
@@ -119,24 +120,94 @@ export class AddonRegistry {
 
     for (const spec of this.#byId.values()) {
       if (!claims(spec, parsed)) continue;
-
-      for (const rule of spec.rules) {
-        for (const scope of pluck(body, rule.at)) {
-          try {
-            const candidate = build(scope, rule.media);
-            if (!candidate) continue;
-            candidate.url = this.rewrite(candidate.url);
-            const item = toItem(candidate, tabId, now);
-            if (item) items.push(item);
-          } catch {
-            /* one malformed payload must not stop the rest */
-          }
-        }
-      }
+      items.push(...runRules(spec, body, tabId, now, (url) => this.rewrite(url)));
     }
 
     return items;
   }
+
+  /**
+   * Reads a response that is a web page rather than an API payload.
+   *
+   * Sites like Adobe Fonts have no public JSON endpoint for their catalogue,
+   * so they render the whole thing into a script tag in the page itself. An
+   * add-on that declares `embedded` says where the JSON starts and ends; the
+   * text in between is parsed and the rules run against it exactly as if it
+   * had arrived as a normal response body.
+   */
+  extractText(url: string, text: string, tabId: number, now = Date.now()): MediaItem[] {
+    const parsed = parse(url);
+    if (!parsed) return [];
+
+    const items: MediaItem[] = [];
+
+    for (const spec of this.#byId.values()) {
+      if (!claims(spec, parsed) || !spec.embedded) continue;
+      const body = cutEmbedded(text, spec.embedded);
+      if (!body) continue;
+      items.push(...runRules(spec, body, tabId, now, (url) => this.rewrite(url)));
+    }
+
+    return items;
+  }
+
+  /**
+   * Whether a document is worth handing over as text. Callers use this to avoid
+   * shipping a whole page across the wire for every site visited.
+   */
+  wantsDocument(url: string): boolean {
+    const parsed = parse(url);
+    if (!parsed) return false;
+    return this.list().some((spec) => spec.embedded && claims(spec, parsed));
+  }
+
+  /** Every embedded marker, so a page can be checked without sending it. */
+  documentMarkers(): string[] {
+    return this.list().flatMap((spec) => (spec.embedded ? [spec.embedded.start] : []));
+  }
+}
+
+/**
+ * Cuts the JSON out of a page and parses it.
+ *
+ * A start marker with no end marker means the page is not the one the rule was
+ * written against, which happens every time a site redesigns. Returning null
+ * is the whole error handling: the caller skips this add-on and carries on.
+ */
+function cutEmbedded(text: string, marker: { start: string; end: string }): unknown | null {
+  const from = text.indexOf(marker.start);
+  if (from === -1) return null;
+  const to = text.indexOf(marker.end, from + marker.start.length);
+  if (to === -1) return null;
+  try {
+    return JSON.parse(text.slice(from, to));
+  } catch {
+    return null;
+  }
+}
+
+function runRules(
+  spec: AddonSpec,
+  body: unknown,
+  tabId: number,
+  now: number,
+  rewrite: (url: string) => string,
+): MediaItem[] {
+  const items: MediaItem[] = [];
+  for (const rule of spec.rules) {
+    for (const scope of pluck(body, rule.at)) {
+      try {
+        const candidate = build(scope, rule.media);
+        if (!candidate) continue;
+        candidate.url = rewrite(candidate.url);
+        const item = toItem(candidate, tabId, now);
+        if (item) items.push(item);
+      } catch {
+        /* one malformed payload must not stop the rest */
+      }
+    }
+  }
+  return items;
 }
 
 /**
@@ -153,10 +224,14 @@ function claims(spec: AddonSpec, parsed: URL): boolean {
   return spec.apiPaths.some((prefix) => pathMatches(parsed.pathname, prefix));
 }
 
+function isTemplate(value: MediaSpec['url']): value is UrlTemplate {
+  return typeof value === 'object' && value !== null && 'template' in value;
+}
+
 function build(scope: Scope, spec: MediaSpec): Candidate | null {
   if (spec.when && !holds(scope, spec.when)) return null;
 
-  const url = readString(scope, spec.url);
+  const url = isTemplate(spec.url) ? buildLink(scope, spec.url) : readString(scope, spec.url);
   if (!url) return null;
 
   const parsed = parse(url);
@@ -213,7 +288,7 @@ function safeSegment(value: string): string {
   return value.replace(/[\s"'<>\\^`{|}]/g, '').replace(/[\r\n]/g, '');
 }
 
-function buildLink(scope: Scope, spec: MediaSpec['postUrl']): string | undefined {
+function buildLink(scope: Scope, spec: UrlTemplate | undefined): string | undefined {
   if (!spec) return undefined;
   let built = spec.template;
   for (const [name, path] of Object.entries(spec.values)) {
@@ -357,6 +432,19 @@ export function validateAddon(
   if (spec.rewrite !== undefined && !Array.isArray(spec.rewrite)) {
     return { ok: false, error: 'rewrite must be an array' };
   }
+  if (spec.embedded !== undefined) {
+    const embedded = spec.embedded as Record<string, unknown>;
+    if (
+      typeof embedded !== 'object' ||
+      embedded === null ||
+      typeof embedded.start !== 'string' ||
+      embedded.start === '' ||
+      typeof embedded.end !== 'string' ||
+      embedded.end === ''
+    ) {
+      return { ok: false, error: 'embedded needs a non-empty start and end' };
+    }
+  }
 
   return { ok: true, spec: value as AddonSpec };
 }
@@ -371,10 +459,25 @@ function validateRule(rule: unknown): string | null {
     return 'rule.media must be an object';
   }
   const media = typed.media as Record<string, unknown>;
-  if (typeof media.url !== 'string' || media.url.trim() === '') {
-    return 'rule.media.url must be a non-empty string';
-  }
-  return null;
+  return isUrlValue(media.url)
+    ? null
+    : 'rule.media.url must be a path, a literal, or a template';
+}
+
+/**
+ * A url is either read straight off the payload or assembled from values that
+ * are. An assembled one has to resolve every placeholder, otherwise the add-on
+ * would fetch a URL with a literal `{kit}` in it.
+ */
+function isUrlValue(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim() !== '';
+  if (typeof value !== 'object' || value === null) return false;
+
+  const { template, values } = value as { template?: unknown; values?: unknown };
+  if (typeof template !== 'string' || template.trim() === '') return false;
+  if (typeof values !== 'object' || values === null) return false;
+
+  return Object.keys(values).every((name) => template.includes(`{${name}}`));
 }
 
 function isStringArray(value: unknown): boolean {

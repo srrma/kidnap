@@ -30,7 +30,7 @@ that defeats one usually falls to another.
 | Network | Every media response the browser receives, identified by content type and by file extension, along with the size and metadata the server reported. |
 | Document | Images, video and audio elements, `srcset` candidates, CSS background images, meta tags, download links and lazy-loaded attributes. Runs in every frame. |
 | Page hook | Media manifests and segments as the page fetches them, plus the JSON bodies of endpoints an add-on asked about. |
-| Add-ons | Site-specific JSON APIs, mapped by data rather than code. |
+| Add-ons | Site-specific JSON APIs, and sites that render their data into the page instead, mapped by data rather than code. |
 | Right-click | Whatever you point it at, unfiltered. |
 
 `blob:` addresses are treated as a signal rather than an item. A blob URL is a
@@ -65,6 +65,21 @@ since the download button is disabled and the request would buy nothing.
 A direct file goes straight to your browser's download manager. A segmented
 stream is fetched piece by piece and joined into one file without re-encoding,
 so the saved copy is the same bytes at the same quality that was streamed.
+
+## Fonts
+
+Adobe Fonts has no catalogue API you may call, so its family and collection
+pages are read directly: every variation in the catalogue appears in the panel,
+named for what it is, with the designer and the family it belongs to.
+
+Fonts are offered twice. **Save** gives you the file the server sent, byte for
+byte. **TTF** converts it to TrueType, which is what Windows will install,
+since the web format is not an installable font there. The conversion is a
+repackaging: the outlines, names and metrics carry across unchanged.
+
+The conversion runs in a sandboxed page, because the only library that can do
+it needs an `eval` that Manifest V3 forbids in an extension page. That is
+Chromium only; see [LIMITATIONS.md](LIMITATIONS.md).
 
 ## What it will not do
 

@@ -84,6 +84,13 @@ function mediaElement(item: MediaItem): HTMLElement {
         src,
         title: item.name ?? 'Document preview',
       });
+    case 'font':
+      return el('div', { class: 'state' }, [
+        el('div', { class: 'state-title' }, ['Font file']),
+        el('div', { class: 'state-detail' }, [
+          'Fonts have nothing to show in a preview pane. Save the file as served, or convert it to TTF if you need something Windows will install directly.',
+        ]),
+      ]);
     default:
       return el('div', { class: 'state' }, [
         el('div', { class: 'state-title' }, ['Segmented stream']),
