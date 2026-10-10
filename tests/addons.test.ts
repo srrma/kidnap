@@ -195,6 +195,42 @@ describe('builtin addons', () => {
     expect(photo?.height).toBe(3840);
   });
 
+  it('reads the home timeline, which is where most scrolling happens', () => {
+    /*
+     * Path and nesting cut from a live HomeTimeline response rather than
+     * assumed. This is the gap that let the timeline fall back to the network
+     * sniffer: rows appeared, but with no author, no caption and no grouping,
+     * because nothing read the payload.
+     */
+    const items = extract(
+      'https://x.com/i/api/graphql/home/HomeTimeline',
+      fixture('x-home-timeline.json'),
+    );
+    expect(items.length).toBeGreaterThan(0);
+
+    for (const item of items) {
+      expect(item.detector).toBe('addon');
+      expect(item.author, `no author on ${item.url}`).toBe('sample name');
+      expect(item.caption, `no caption on ${item.url}`).toBe('sample tweet text');
+      expect(item.pageUrl).toMatch(/^https:\/\/x\.com\/i\/status\//);
+    }
+
+    const video = items.find((item) => item.url.includes('high.mp4'));
+    expect(video?.kind).toBe('video');
+    expect(video?.bitrate).toBe(2_176_000);
+    expect(video?.duration).toBeCloseTo(13, 3);
+    expect(video?.thumbnail).toBe('https://pbs.twimg.com/ext_tw_video_thumb/sample.jpg');
+    /* Two mp4 renditions plus the HLS master, collapsed into one group. */
+    expect(items.filter((item) => item.url.includes('.mp4'))).toHaveLength(2);
+    expect(items.some((item) => item.url.includes('.m3u8'))).toBe(true);
+    expect(
+      new Set(items.filter((i) => i.url.includes('.mp4')).map((i) => i.groupId)).size,
+    ).toBe(1);
+
+    const photo = items.find((item) => item.kind === 'image');
+    expect(photo?.url).toBe('https://pbs.twimg.com/media/sample.jpg');
+  });
+
   it('reads a profile timeline', () => {
     const items = extract('https://x.com/i/api/graphql', fixture('x-user-timeline.json'));
     const photo = items.find((item) => item.kind === 'image');

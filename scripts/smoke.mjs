@@ -347,12 +347,9 @@ try {
   console.log(`\nmedia responses the page actually made: ${pageMedia.length}`);
   for (const m of pageMedia.slice(0, 5)) console.log(`  ${m.type}  ${m.url}`);
   /*
-   * Timeline responses on current x.com carry no media block at all; videos
-   * there are found by the network sniffer. Opening a tweet directly uses a
-   * different endpoint that still does, so that is the one worth proving the
-   * add-on against.
-   */
-  /*
+   * Opening a tweet directly, to prove the add-on against the endpoint that
+   * carries the most complete payload of the two.
+   *
    * Most tweets carry no media, so one link is not enough to see anything.
    * Several are tried and the first with media wins.
    */

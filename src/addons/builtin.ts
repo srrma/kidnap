@@ -35,8 +35,12 @@ import type { AddonSpec, MediaSpec, RuleSpec } from '../core/types';
 const X_TWEET_PATHS = [
   /* A tweet opened directly. */
   'data.tweetResult.result',
-  /* The signed-in home timeline. Confirmed against a live HomeTimeline
-     response, which nests one level deeper than a conversation. */
+  /*
+   * The signed-in home timeline.
+   *
+   * Two shapes are covered. The nested rules read media inside legacy; the
+   * sibling shape still appears on other entry points.
+   */
   'data.home.home_timeline_urt.instructions[].entries[].content.itemContent.tweet_results.result',
   /* A conversation opened from a tweet. */
   'data.threaded_conversation.instructions[].entries[].content.itemContent.item',
@@ -78,7 +82,11 @@ const X_VIDEO: MediaSpec = {
 };
 
 const X_PHOTO: MediaSpec = {
-  // Without this a video's poster frame is offered as if it were a rendition.
+  /*
+   * Without this a video's poster frame is offered as if it were a rendition:
+   * a video media object carries a media_url_https too, so the same tweet
+   * arrives with both its video and its thumbnail as separate downloads.
+   */
   when: { path: 'type', equals: 'photo' },
   url: 'media_url_https',
   width: 'original_info.width',
@@ -101,6 +109,15 @@ const X_PHOTO: MediaSpec = {
 const X_TWEET_PATHS_NESTED = [
   'data.threaded_conversation_with_injections_v2.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
   'data.threaded_conversation_with_injections_v2.instructions[].entries[].content.itemContent.item.legacy',
+  /*
+   * The home timeline, which is where most scrolling happens. Confirmed
+   * against a live HomeTimeline response: 35 tweets, 40 images, media nested
+   * under legacy exactly as a conversation nests it. Without this rule the
+   * timeline produced rows from the network sniffer only, with no author, no
+   * caption and no grouping
+   */
+  'data.home.home_timeline_urt.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
+  'data.home.home_timeline_urt.instructions[].entries[].content.itemContent.item.legacy',
 ];
 
 /*
@@ -134,6 +151,8 @@ const X_VIDEO_NESTED: MediaSpec = {
 };
 
 const X_PHOTO_NESTED: MediaSpec = {
+  /* The same guard as the sibling shape, which was missing here. */
+  when: { path: 'type', equals: 'photo' },
   url: 'media_url_https',
   width: 'original_info.width',
   height: 'original_info.height',
