@@ -440,6 +440,43 @@ button {
   font-size: 12px;
 }
 
+/* ── Specimen ───────────────────────────────────────────────────────────── */
+
+/*
+ * A type specimen reads as one block of set text, not as separate panels, so
+ * there are no borders between the lines. The alphabet is allowed to wrap: a
+ * narrow panel is exactly where someone checks whether a face still has every
+ * letter.
+ */
+.specimen {
+  display: grid;
+  gap: 10px;
+  padding: 4px 0 8px;
+}
+
+.specimen-line {
+  margin: 0;
+  color: var(--text);
+  /* A face without these metrics set still has to be readable here. */
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.specimen-name {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.specimen-sentence {
+  font-size: 19px;
+}
+
+.specimen-set {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
 /* ── Sheet ──────────────────────────────────────────────────────────────── */
 
 /* The one blurred surface in the product. Everything else is opaque. */

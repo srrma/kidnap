@@ -10,12 +10,20 @@
 import type { MediaItem } from '../core/types';
 import { displayHost, fileNameOf } from '../core/url';
 import { bytes, duration, el, sheet, toast } from './dom';
+import { fontSpecimen } from './font';
 
 export function openPreview(
   item: MediaItem,
   download: (items: MediaItem[]) => Promise<void>,
 ): void {
-  const media = mediaElement(item);
+  /*
+   * A font holds a fetched copy of itself in the document while its preview is
+   * open, so it is released when the sheet closes rather than left behind.
+   */
+  let release: (() => void) | null = null;
+  const media = mediaElement(item, (dispose) => {
+    release = dispose;
+  });
   const body = el('div', {}, [media, metaTable(item)]);
 
   const save = el(
@@ -52,7 +60,13 @@ export function openPreview(
       const chosen = item.variants?.[Number(picker.value)];
       if (!chosen) return;
       item.url = chosen.url;
-      media.replaceWith(mediaElement(item));
+      release?.();
+      release = null;
+      media.replaceWith(
+        mediaElement(item, (dispose) => {
+          release = dispose;
+        }),
+      );
       toast('Switched rendition');
     });
     actions.unshift(picker);
@@ -62,10 +76,11 @@ export function openPreview(
     title: item.name ?? fileNameOf(item.url) ?? displayHost(item.url),
     body,
     actions,
+    onClose: () => release?.(),
   });
 }
 
-function mediaElement(item: MediaItem): HTMLElement {
+function mediaElement(item: MediaItem, onRelease: (dispose: () => void) => void): HTMLElement {
   const src = item.url;
   switch (item.kind) {
     case 'image':
@@ -84,13 +99,11 @@ function mediaElement(item: MediaItem): HTMLElement {
         src,
         title: item.name ?? 'Document preview',
       });
-    case 'font':
-      return el('div', { class: 'state' }, [
-        el('div', { class: 'state-title' }, ['Font file']),
-        el('div', { class: 'state-detail' }, [
-          'Fonts have nothing to show in a preview pane. Save the file as served, or convert it to TTF if you need something Windows will install directly.',
-        ]),
-      ]);
+    case 'font': {
+      const specimen = fontSpecimen(item);
+      onRelease(specimen.dispose);
+      return specimen.node;
+    }
     default:
       return el('div', { class: 'state' }, [
         el('div', { class: 'state-title' }, ['Segmented stream']),

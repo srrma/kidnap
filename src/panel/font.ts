@@ -12,7 +12,9 @@
  */
 
 import { isTrueType, ttfName } from '../core/font';
+import type { MediaItem } from '../core/types';
 import { api } from '../platform';
+import { el } from './dom';
 
 /** A stall here means the sandboxed page is not answering, not that it is slow. */
 const TIMEOUT_MS = 20_000;
@@ -106,4 +108,121 @@ export async function saveFontAsTtf(
   });
   void frameReady;
   return { filename: name, bytes: ttf.length };
+}
+
+/* ── Specimen ────────────────────────────────────────────────────────────── */
+
+let serial = 0;
+
+/**
+ * A font fetched into the panel and registered with the document.
+ *
+ * It arrives as a blob rather than straight from the CDN because a web font is
+ * always fetched in CORS mode, and the panel would rather not depend on the
+ * font server sending headers that allow it. The bytes were fetched by
+ * something that already holds host permissions.
+ */
+interface LoadedFont {
+  family: string;
+  dispose: () => void;
+}
+
+async function loadFont(url: string): Promise<LoadedFont> {
+  const response = await fetch(url, { credentials: 'include' });
+  if (!response.ok) throw new Error(`the font server answered ${response.status}`);
+
+  const bytes = await response.arrayBuffer();
+  const href = URL.createObjectURL(new Blob([bytes], { type: 'font/woff2' }));
+  /* Each face needs its own name; two rows are rarely the same face. */
+  serial += 1;
+  const family = `kidnap-specimen-${serial}`;
+
+  const face = new FontFace(family, `url(${href})`);
+  try {
+    await face.load();
+  } catch (error) {
+    URL.revokeObjectURL(href);
+    throw error;
+  }
+  document.fonts.add(face);
+
+  return {
+    family,
+    dispose: () => {
+      document.fonts.delete(face);
+      URL.revokeObjectURL(href);
+    },
+  };
+}
+
+/*
+ * What a specimen has to show, in the order that answers "is this the face I
+ * meant": the name, then a sentence that exercises ascenders, descenders and
+ * letter spacing, then the character set rather than only the common words.
+ */
+const LINES: Array<{ text: string; className?: string }> = [
+  { text: 'The quick brown fox jumps over the lazy dog', className: 'specimen-sentence' },
+  { text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', className: 'specimen-set' },
+  { text: 'abcdefghijklmnopqrstuvwxyz', className: 'specimen-set' },
+  { text: '0123456789 &@#%€£¥ .,;:!?—–()[]{}"\'', className: 'specimen-set' },
+];
+
+export interface Specimen {
+  node: HTMLElement;
+  dispose: () => void;
+}
+
+/**
+ * Builds the preview for a font.
+ *
+ * The font is only fetched once a preview is opened, because a family page can
+ * hold eighteen of them and nobody should pay for eighteen downloads to look
+ * at one.
+ */
+export function fontSpecimen(item: MediaItem): Specimen {
+  const placeholder = el('div', { class: 'state' }, [
+    el('div', { class: 'state-title' }, ['Loading the font']),
+    el('div', { class: 'state-detail' }, [
+      'Fetching the file so it can be set in the lines below.',
+    ]),
+  ]);
+  const node = el('div', { class: 'specimen-host' }, [placeholder]);
+
+  let dispose = (): void => {};
+
+  void loadFont(item.url)
+    .then((loaded) => {
+      dispose = loaded.dispose;
+      node.replaceChildren(specimenFor(loaded.family, item));
+    })
+    .catch((error: unknown) => {
+      node.replaceChildren(
+        el('div', { class: 'state' }, [
+          el('div', { class: 'state-title' }, ['The font could not be previewed']),
+          el('div', { class: 'state-detail' }, [
+            error instanceof Error
+              ? error.message
+              : 'The file could not be loaded. Saving it may still work.',
+          ]),
+        ]),
+      );
+    });
+
+  return {
+    node,
+    dispose: () => dispose(),
+  };
+}
+
+function specimenFor(family: string, item: MediaItem): HTMLElement {
+  const line = (text: string, className?: string): HTMLElement => {
+    const node = el('p', { class: `specimen-line ${className ?? ''}`.trim() }, [text]);
+    node.style.fontFamily = `"${family}", sans-serif`;
+    return node;
+  };
+
+  return el('div', { class: 'specimen' }, [
+    line(item.name ?? 'Font preview', 'specimen-name'),
+    ...LINES.map((entry) => line(entry.text, entry.className)),
+  ]);
 }
