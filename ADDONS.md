@@ -233,6 +233,14 @@ Open Settings, paste an add-on into **Your own add-ons**, and save. Invalid
 JSON is reported under the box and rejected; a structurally valid add-on that
 simply matches nothing is accepted and stays quiet.
 
+## X / Twitter
+
+The add-on language rules for X are easy to get subtly wrong, because the same
+data arrives in several shapes depending on which surface you are on. The
+endpoints, the paths and the traps are written down in
+[X responses](docs/x-responses.md), and
+`node scripts/capture-x.mjs` regenerates that record from a live session.
+
 ## What add-ons cannot do
 
 - Cannot execute code, by construction.

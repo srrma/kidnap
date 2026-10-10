@@ -106,19 +106,50 @@ const X_PHOTO: MediaSpec = {
  * Confirmed against a live TweetDetail response, which uses a different root
  * name again.
  */
-const X_TWEET_PATHS_NESTED = [
+const X_TWEET_RESULTS_NESTED = [
   'data.threaded_conversation_with_injections_v2.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
   'data.threaded_conversation_with_injections_v2.instructions[].entries[].content.itemContent.item.legacy',
   /*
    * The home timeline, which is where most scrolling happens. Confirmed
-   * against a live HomeTimeline response: 35 tweets, 40 images, media nested
-   * under legacy exactly as a conversation nests it. Without this rule the
-   * timeline produced rows from the network sniffer only, with no author, no
-   * caption and no grouping
+   * against a live HomeTimeline response: 45 media objects, 9 of them video,
+   * media nested under legacy exactly as a conversation nests it. Without this
+   * rule the timeline produced rows from the network sniffer only, with no
+   * author, no caption and no grouping
    */
   'data.home.home_timeline_urt.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
-  'data.home.home_timeline_urt.instructions[].entries[].content.itemContent.item.legacy',
+  'data.home.home_timeline_urt.instructions[].entries[].content.items[].item.itemContent.tweet_results.result.legacy',
+  /* Search, confirmed against a live SearchTimeline response. */
+  'data.search_by_raw_query.search_timeline.timeline.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
+  /*
+   * A profile. The root is timeline.timeline, not timeline_v2.timeline; the
+   * older spelling is kept below with the sibling shapes it belongs to.
+   */
+  'data.user.result.timeline.timeline.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
+  'data.user.result.timeline.timeline.instructions[].entries[].content.items[].item.itemContent.tweet_results.result.legacy',
+  'data.bookmark_timeline_v2.timeline.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
+  'data.bookmark_timeline_v2.timeline.instructions[].entries[].content.items[].item.itemContent.tweet_results.result.legacy',
+  'data.explore_page.body.initialTimeline.timeline.timeline.instructions[].entries[].content.itemContent.tweet_results.result.legacy',
+  'data.explore_page.body.initialTimeline.timeline.timeline.instructions[].entries[].content.items[].item.itemContent.tweet_results.result.legacy',
 ];
+
+/**
+ * A quoted tweet arrives as a whole second result object under the tweet
+ * quoting it, with its own legacy and its own media. Every timeline carries
+ * them, so every path above has a quoted twin rather than each being written
+ * out twice.
+ */
+function withQuoted(paths: readonly string[]): string[] {
+  const quoted = paths.map((path) =>
+    path.replace(
+      '.tweet_results.result.legacy',
+      '.tweet_results.result.quoted_status_result.result.legacy',
+    ),
+  );
+  /* A path that has no tweet_results is returned unchanged by the replace. */
+  return [...new Set([...paths, ...quoted])];
+}
+
+const X_TWEET_PATHS_NESTED = withQuoted(X_TWEET_RESULTS_NESTED);
 
 /*
  * With the media inside `legacy`, the tweet is one step further away, so every

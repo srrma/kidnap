@@ -119,26 +119,77 @@ describe('builtin addons', () => {
     expect(video?.pageUrl).toBe('https://x.com/i/status/1750000000000000010');
   });
 
-  it('reads a search timeline built from the live response skeleton', () => {
+  /*
+   * Every timeline the site serves, asserted the same way.
+   *
+   * These fixtures are cut from real responses rather than written to match a
+   * rule, which is the only arrangement that catches a rule written to match a
+   * fixture. The previous search fixture was built by hand from a real
+   * skeleton, and being hand built it had the wrong nesting, so the search
+   * rule passed its test while matching nothing on the site.
+   */
+  const TIMELINES: Array<[string, string]> = [
+    ['x-home-timeline.json', 'HomeTimeline'],
+    ['x-search-timeline.json', 'SearchTimeline'],
+    ['x-user-timeline.json', 'UserOriginalsTimeline'],
+    ['x-user-video-timeline.json', 'UserVideoTimeline'],
+    ['x-bookmarks.json', 'Bookmarks'],
+  ];
+
+  for (const [file, endpoint] of TIMELINES) {
+    it(`reads media from ${endpoint}, as the site serves it`, () => {
+      const items = extract(`https://x.com/i/api/graphql/abc/${endpoint}`, fixture(file));
+      expect(items.length).toBeGreaterThan(0);
+
+      for (const item of items) {
+        /* A row with no author is what the network sniffer produces; these
+           must be the add-on's, with the tweet behind them. */
+        expect(item.detector).toBe('addon');
+        expect(item.author, `no author on ${item.url}`).toBe('sample name');
+        expect(item.caption).toBeTruthy();
+        expect(item.pageUrl).toMatch(/^https:\/\/x\.com\/i\/status\//);
+      }
+
+      /* A video carries real renditions, and they share one group so the row
+         offers a picker rather than several near-identical downloads. */
+      const videos = items.filter((item) => item.kind === 'video');
+      if (videos.length > 0) {
+        for (const video of videos) {
+          expect(video.bitrate).toBeGreaterThan(0);
+          expect(video.duration).toBeGreaterThan(0);
+          expect(video.width).toBeGreaterThan(0);
+        }
+        const group = new Set(videos.map((v) => v.groupId));
+        expect(group.size).toBeLessThan(videos.length);
+      }
+    });
+  }
+
+  it('reads a quoted tweet, which arrives as a second result object', () => {
     /*
-     * The outer shape here came from a real SearchTimeline response on
-     * x.com, captured while signed in. Only the media block and the strings
-     * were added afterwards, because the tweets returned during that run had no
-     * media in them at all.
+     * A quoted tweet is a whole tweet inside another tweet's result, with its
+     * own legacy and its own media, and it is not covered by any of the paths
+     * above. It is reached by giving every one of them a quoted twin rather
+     * than by writing each surface out twice.
      */
-    const items = extract(
-      'https://x.com/i/api/graphql/abc/SearchTimeline',
-      fixture('x-search-timeline.json'),
+    const body = fixture('x-bookmarks.json');
+    const quoted = pluck(
+      body,
+      'data.bookmark_timeline_v2.timeline.instructions[].entries[].content.itemContent.tweet_results.result.quoted_status_result.result',
     );
-    const video = items.find((item) => item.url.includes('high.mp4'));
-    expect(video).toBeDefined();
-    expect(video?.kind).toBe('video');
-    expect(video?.bitrate).toBe(2_176_000);
-    expect(video?.author).toBe('Example Channel');
-    expect(video?.published).toBe('2023-06-14T12:00:00.000Z');
-    expect(video?.pageUrl).toBe('https://x.com/i/status/1750000000000009999');
-    expect(items.filter((item) => item.url.includes('.mp4'))).toHaveLength(2);
-    expect(items.some((item) => item.url.includes('.m3u8'))).toBe(true);
+    expect(quoted.length, 'the fixture should keep a quoted tweet').toBeGreaterThan(0);
+    const quotedId = read(quoted[0] as never, 'rest_id');
+    expect(typeof quotedId).toBe('string');
+
+    const items = extract(
+      'https://x.com/i/api/graphql/abc/Bookmarks',
+      fixture('x-bookmarks.json'),
+    );
+    const fromQuote = items.filter(
+      (item) => item.pageUrl === `https://x.com/i/status/${quotedId}`,
+    );
+    expect(fromQuote.length, 'the quoted tweet produced no rows').toBeGreaterThan(0);
+    for (const item of fromQuote) expect(item.author).toBe('sample name');
   });
 
   it('reads a tweet detail, where the media nests inside legacy', () => {
@@ -229,14 +280,6 @@ describe('builtin addons', () => {
 
     const photo = items.find((item) => item.kind === 'image');
     expect(photo?.url).toBe('https://pbs.twimg.com/media/sample.jpg');
-  });
-
-  it('reads a profile timeline', () => {
-    const items = extract('https://x.com/i/api/graphql', fixture('x-user-timeline.json'));
-    const photo = items.find((item) => item.kind === 'image');
-    expect(photo?.width).toBe(1200);
-    expect(photo?.author).toBe('Timeline Person');
-    expect(photo?.caption).toBe('from a profile timeline');
   });
 
   it('reads Reddit video', () => {

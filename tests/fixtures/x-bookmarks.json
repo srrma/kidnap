@@ -1,0 +1,221 @@
+{
+  "data": {
+    "bookmark_timeline_v2": {
+      "timeline": {
+        "instructions": [
+          {
+            "type": "TimelineAddEntries",
+            "entries": [
+              {
+                "entryId": "tweet-2108129629697626620",
+                "content": {
+                  "entryType": "TimelineTimelineItem",
+                  "itemContent": {
+                    "itemType": "TimelineTweet",
+                    "tweet_results": {
+                      "result": {
+                        "__typename": "Tweet",
+                        "rest_id": "2108129629697626620",
+                        "core": {
+                          "user_results": {
+                            "result": {
+                              "core": {
+                                "name": "sample name",
+                                "screen_name": "sample handle"
+                              }
+                            }
+                          }
+                        },
+                        "legacy": {
+                          "id_str": "2108129629697626620",
+                          "full_text": "人は努力次第で変われます。\n←1年半前\n　　　　　　　　　　　　　　　現在→ https://t.co/FeD5ZtIozj",
+                          "created_at": "Thu Oct 08 09:37:25 +0000 2026",
+                          "extended_entities": {
+                            "media": [
+                              {
+                                "id_str": "2108129622655451136",
+                                "type": "photo",
+                                "media_key": "3_2108129622655451136",
+                                "media_url_https": "https://pbs.twimg.com/media/HUGUuPLbQAA-scf.jpg",
+                                "original_info": {
+                                  "width": 711,
+                                  "height": 1242
+                                }
+                              },
+                              {
+                                "id_str": "2108129622709895168",
+                                "type": "photo",
+                                "media_key": "3_2108129622709895168",
+                                "media_url_https": "https://pbs.twimg.com/media/HUGUuPYaAAAKKX1.jpg",
+                                "original_info": {
+                                  "width": 1536,
+                                  "height": 2048
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "quoted_status_result": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2107841493381832974",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "core": {
+                                    "name": "sample name",
+                                    "screen_name": "sample handle"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "id_str": "2107841493381832974",
+                              "full_text": "人は努力次第で変われます。\n←10年前　                               　現在→\n\n #男の娘  #ニューハーフ https://t.co/IffW7rLT57",
+                              "created_at": "Wed Oct 07 14:32:28 +0000 2026",
+                              "extended_entities": {
+                                "media": [
+                                  {
+                                    "id_str": "2107841486851289088",
+                                    "type": "photo",
+                                    "media_key": "3_2107841486851289088",
+                                    "media_url_https": "https://pbs.twimg.com/media/HUCOqhqaMAAMb23.jpg",
+                                    "original_info": {
+                                      "width": 1252,
+                                      "height": 1535
+                                    }
+                                  },
+                                  {
+                                    "id_str": "2107841486876459008",
+                                    "type": "photo",
+                                    "media_key": "3_2107841486876459008",
+                                    "media_url_https": "https://pbs.twimg.com/media/HUCOqhwaQAAoGxL.jpg",
+                                    "original_info": {
+                                      "width": 1536,
+                                      "height": 2048
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "entryId": "tweet-2108498958385381502",
+                "content": {
+                  "entryType": "TimelineTimelineItem",
+                  "itemContent": {
+                    "itemType": "TimelineTweet",
+                    "tweet_results": {
+                      "result": {
+                        "__typename": "Tweet",
+                        "rest_id": "2108498958385381502",
+                        "core": {
+                          "user_results": {
+                            "result": {
+                              "core": {
+                                "name": "sample name",
+                                "screen_name": "sample handle"
+                              }
+                            }
+                          }
+                        },
+                        "legacy": {
+                          "id_str": "2108498958385381502",
+                          "full_text": "\"PROPOSAL SKRIPSI\" pake \"LITERATURE REVIEW RESEARCH GAP\" ??? inilah cok alasan kenapa hasilnya \"GACOR BAT\" sorry i've to say all over again &gt;&lt;\n\nbare minimum bangettt misal kek gue handle pake template ini https://t.co/N4IVMwuZ7n",
+                          "created_at": "Fri Oct 09 10:05:00 +0000 2026",
+                          "extended_entities": {
+                            "media": [
+                              {
+                                "id_str": "2108491446680727552",
+                                "type": "video",
+                                "media_key": "13_2108491446680727552",
+                                "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2108491446680727552/img/4l5rgRpuH4qfQX7f.jpg",
+                                "original_info": {
+                                  "width": 2516,
+                                  "height": 1610
+                                },
+                                "video_info": {
+                                  "duration_millis": 120283,
+                                  "variants": [
+                                    {
+                                      "content_type": "application/x-mpegURL",
+                                      "url": "https://video.twimg.com/amplify_video/2108491446680727552/pl/Y1v2qy1ACuzEiINr.m3u8?tag=29"
+                                    },
+                                    {
+                                      "bitrate": 256000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2108491446680727552/vid/avc1/420x270/W3OpdpQKDLsdczeZ.mp4?tag=29"
+                                    },
+                                    {
+                                      "bitrate": 832000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2108491446680727552/vid/avc1/562x360/pMf_6V3SFKa6BXMb.mp4?tag=29"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "entryId": "tweet-2108815923650126023",
+                "content": {
+                  "entryType": "TimelineTimelineItem",
+                  "itemContent": {
+                    "itemType": "TimelineTweet",
+                    "tweet_results": {
+                      "result": {
+                        "__typename": "Tweet",
+                        "rest_id": "2108815923650126023",
+                        "core": {
+                          "user_results": {
+                            "result": {
+                              "core": {
+                                "name": "sample name",
+                                "screen_name": "sample handle"
+                              }
+                            }
+                          }
+                        },
+                        "legacy": {
+                          "id_str": "2108815923650126023",
+                          "full_text": "这算嫌弃脸嘛？\n#男娘 https://t.co/tc4W72Cwvc",
+                          "created_at": "Sat Oct 10 07:04:30 +0000 2026",
+                          "extended_entities": {
+                            "media": [
+                              {
+                                "id_str": "2108815911046283264",
+                                "type": "photo",
+                                "media_key": "3_2108815911046283264",
+                                "media_url_https": "https://pbs.twimg.com/media/HUQE5eqbAAAdvdU.jpg",
+                                "original_info": {
+                                  "width": 3071,
+                                  "height": 4096
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

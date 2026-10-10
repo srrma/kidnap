@@ -44,6 +44,10 @@ and where inside a response the media URLs live. It cannot call a function,
 reach the network on its own, or touch the page. That limit is what makes it
 reasonable to paste an add-on from a forum post. See [ADDONS.md](ADDONS.md).
 
+X / Twitter deserves a note of its own: its responses change shape depending on
+which surface you are on, and the differences are recorded in
+[docs/x-responses.md](docs/x-responses.md) rather than left to be rediscovered.
+
 ## Thumbnails
 
 Images show themselves. Video rows show a real frame decoded from the file

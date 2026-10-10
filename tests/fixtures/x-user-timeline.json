@@ -2,46 +2,178 @@
   "data": {
     "user": {
       "result": {
-        "timeline_v2": {
+        "timeline": {
           "timeline": {
             "instructions": [
               {
                 "type": "TimelineAddEntries",
                 "entries": [
                   {
+                    "entryId": "tweet-2108920676773945685",
                     "content": {
                       "entryType": "TimelineTimelineItem",
                       "itemContent": {
                         "itemType": "TimelineTweet",
-                        "item": {
-                          "__typename": "Tweet",
-                          "rest_id": "1750000000000000020",
-                          "core": {
-                            "user_results": {
-                              "result": {
-                                "core": {
-                                  "name": "Timeline Person"
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2108920676773945685",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "core": {
+                                    "name": "sample name",
+                                    "screen_name": "sample handle"
+                                  }
                                 }
+                              }
+                            },
+                            "legacy": {
+                              "id_str": "2108920676773945685",
+                              "full_text": "Hard to believe something this colorful needs a passport.\n\nEach fall, painted buntings head south, traveling from their breeding grounds to winter in places like Florida, the Caribbean, and Central America.\n\nOne incredible journey to celebrate this World Migratory Bird Day. https://t.co/XvgGj0o6vf",
+                              "created_at": "Sat Oct 10 14:00:45 +0000 2026",
+                              "extended_entities": {
+                                "media": [
+                                  {
+                                    "id_str": "2108920674420961280",
+                                    "type": "photo",
+                                    "media_key": "3_2108920674420961280",
+                                    "media_url_https": "https://pbs.twimg.com/media/HURkLgpWsAAZr93.jpg",
+                                    "ext_alt_text": "Colorful painted bunting perched on a weathered branch against a blurred green background.",
+                                    "original_info": {
+                                      "width": 1300,
+                                      "height": 875
+                                    }
+                                  }
+                                ]
                               }
                             }
-                          },
-                          "legacy": {
-                            "id_str": "1750000000000000020",
-                            "full_text": "from a profile timeline",
-                            "created_at": "Wed Jun 14 12:00:00 +0000 2023"
-                          },
-                          "extended_entities": {
-                            "media": [
-                              {
-                                "id_str": "1900000000000000021",
-                                "type": "photo",
-                                "media_url_https": "https://pbs.twimg.com/media/jkl.jpg",
-                                "original_info": {
-                                  "width": 1200,
-                                  "height": 800
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-2108663801004388453",
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2108663801004388453",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "core": {
+                                    "name": "sample name",
+                                    "screen_name": "sample handle"
+                                  }
                                 }
                               }
-                            ]
+                            },
+                            "legacy": {
+                              "id_str": "2108663801004388453",
+                              "full_text": "This tiger salamander was spotted scurrying across a road at Tamarac National Wildlife Refuge in Minnesota, heading underground where it can wait out winter below the freeze line.\n\nVideo by Blackledge/USFWS https://t.co/0aUAJDhRxZ",
+                              "created_at": "Fri Oct 09 21:00:01 +0000 2026",
+                              "extended_entities": {
+                                "media": [
+                                  {
+                                    "id_str": "2108662642621460480",
+                                    "type": "video",
+                                    "media_key": "7_2108662642621460480",
+                                    "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/2108662642621460480/pu/img/Urr4P2OfLjE_mYGq.jpg",
+                                    "original_info": {
+                                      "width": 720,
+                                      "height": 1280
+                                    },
+                                    "video_info": {
+                                      "duration_millis": 12166,
+                                      "variants": [
+                                        {
+                                          "content_type": "application/x-mpegURL",
+                                          "url": "https://video.twimg.com/ext_tw_video/2108662642621460480/pu/pl/g_NZ0K5VDoR73iCK.m3u8?tag=12&v=cfc"
+                                        },
+                                        {
+                                          "bitrate": 632000,
+                                          "content_type": "video/mp4",
+                                          "url": "https://video.twimg.com/ext_tw_video/2108662642621460480/pu/vid/avc1/320x568/mwxlum6CC8VqtLDC.mp4?tag=12"
+                                        },
+                                        {
+                                          "bitrate": 950000,
+                                          "content_type": "video/mp4",
+                                          "url": "https://video.twimg.com/ext_tw_video/2108662642621460480/pu/vid/avc1/480x852/BjncnxLuxT9Pxjwt.mp4?tag=12"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-2108588297937359286",
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2108588297937359286",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "core": {
+                                    "name": "sample name",
+                                    "screen_name": "sample handle"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "id_str": "2108588297937359286",
+                              "full_text": "This week, @SecretaryBurgum kicked things off in Louisiana, where he saw the first shipment of aluminum from Venezuela arrive in the United States. https://t.co/R8PFRnURBQ",
+                              "created_at": "Fri Oct 09 16:00:00 +0000 2026",
+                              "extended_entities": {
+                                "media": [
+                                  {
+                                    "id_str": "2108576923806748672",
+                                    "type": "video",
+                                    "media_key": "13_2108576923806748672",
+                                    "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2108576923806748672/img/Y3VIIrAMW_Ix1lpE.jpg",
+                                    "original_info": {
+                                      "width": 1080,
+                                      "height": 1920
+                                    },
+                                    "video_info": {
+                                      "duration_millis": 103394,
+                                      "variants": [
+                                        {
+                                          "content_type": "application/x-mpegURL",
+                                          "url": "https://video.twimg.com/amplify_video/2108576923806748672/pl/0T9xbJMCmx6VYBtW.m3u8?tag=29&v=27b"
+                                        },
+                                        {
+                                          "bitrate": 632000,
+                                          "content_type": "video/mp4",
+                                          "url": "https://video.twimg.com/amplify_video/2108576923806748672/vid/avc1/320x568/nH4NXN-GoK9q6DUI.mp4?tag=29"
+                                        },
+                                        {
+                                          "bitrate": 950000,
+                                          "content_type": "video/mp4",
+                                          "url": "https://video.twimg.com/amplify_video/2108576923806748672/vid/avc1/480x852/BcfLHo1uFj5--r0s.mp4?tag=29"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
                           }
                         }
                       }
