@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      - name: Add-on parity against the previous extractors
+        run: node scripts/parity.mjs
+
+      - name: Package both targets
+        run: npm run package
+
+      # A tag that does not match the version in package.json would produce a
+      # zip labelled one version and a release labelled another.
+      - name: Refuse a tag that disagrees with the manifest version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$version" != "$tag" ]; then
+            echo "tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Fail if a packaged zip contains source maps
+        run: |
+          if unzip -l artifacts/*.zip | grep -q '\.map$'; then
+            echo "source maps in a release artifact"
+            exit 1
+          fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/*.zip
+          body_path: docs/release-notes-${{ env.VERSION }}.md
