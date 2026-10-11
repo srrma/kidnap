@@ -282,21 +282,6 @@ describe('builtin addons', () => {
     expect(photo?.url).toBe('https://pbs.twimg.com/media/sample.jpg');
   });
 
-  it('reads Reddit video', () => {
-    const items = extract(
-      'https://www.reddit.com/svc/shreddit/comments/abc.json',
-      fixture('reddit-post.json'),
-    );
-    const video = items.find((item) => item.kind === 'video');
-    expect(video?.url).toContain('DASH_720.mp4');
-    expect(video?.caption).toBe('the final lap');
-    expect(video?.author).toBe('example_user');
-    expect(video?.pageUrl).toBe(
-      'https://www.reddit.com/r/videos/comments/abc123/the_final_lap/',
-    );
-    expect(video?.postId).toBe('abc123');
-  });
-
   it('reads a TikTok video', () => {
     const items = extract(
       'https://www.tiktok.com/api/post/item_list/',
@@ -322,21 +307,6 @@ describe('builtin addons', () => {
     ]);
     expect(images.every((item) => item.author === 'example')).toBe(true);
     expect(images[0]?.pageUrl).toBe('https://imgur.com/Xy9zK2p');
-  });
-
-  it('reads Facebook HD and SD separately', () => {
-    const items = extract(
-      'https://www.facebook.com/api/graphql/',
-      fixture('facebook-video.json'),
-    );
-    const video = items.filter((item) => item.kind === 'video');
-    expect(video.map((item) => item.label).sort()).toEqual(['HD', 'SD']);
-
-    const hd = video.find((item) => item.label === 'HD');
-    expect(hd?.caption).toBe('wedding ceremony highlights');
-    expect(hd?.author).toBe('Example Events');
-    expect(hd?.postId).toBe('10153231379946729');
-    expect(hd?.pageUrl).toContain('10153231379946729');
   });
 
   it('returns nothing for a body it does not recognise', () => {
@@ -528,14 +498,12 @@ describe('validation', () => {
     /* A platform with no fixture is a platform that breaks silently. */
     const covered = new Set([
       'x',
-      'reddit',
       'instagram',
       'pinterest',
       'behance',
       'tiktok',
       'imgur',
       'bsky',
-      'facebook',
       'adobe-fonts',
       'adobe-fonts-collections',
     ]);

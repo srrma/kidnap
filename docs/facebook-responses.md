@@ -1,9 +1,9 @@
 # Facebook responses
 
-**Not mapped.** This file records what was captured and what was not, because
-the honest finding is that Facebook did not hand over its feed, and writing a
-rule from what did arrive would be exactly the mistake this document exists to
-prevent.
+**Not supported. The add-on has been removed.** Eighteen responses were
+captured across the home feed and the watch page, and the rule matched none of
+them while its hand-written fixture matched two. This file records what was
+captured and what was not.
 
 Signed in as the user in the supplied cookie file, the feed renders. Across
 sixteen scrolls, the only responses carrying a media URL were:
@@ -29,15 +29,24 @@ The feed also appears to have contained no media posts at all in these
 sessions: sixteen scrolls of the signed-in home feed produced no video links,
 so the one endpoint the add-on actually targets could not be exercised either.
 
-## The current rules
+## The removed rule
 
-`src/addons/builtin.ts` reads `data.video` from `/video/unified_cvc`, taking
-`browser_native_hd_url` and `browser_native_sd_url`. That endpoint did fire
-once during browsing, which is evidence it is still live, but no body was
-captured from it and **no rule here has been run against a real response**.
+The add-on read `data.video` from `/video/unified_cvc`, taking
+`browser_native_hd_url` and `browser_native_sd_url`. That endpoint fired once
+during early browsing, which is the only evidence it is live; no body was ever
+captured from it, and `/watch/?v=` would not produce a video link to open.
 
-Its fixture, `facebook-video.json`, is hand-written. So is every other fixture
-behind an add-on listed below.
+```text
+against 18 real responses from the feed and the watch page:  0 rows
+against its hand-written fixture:                           2 rows
+```
+
+The fixture has been deleted with the add-on.
+
+## What remains unverified
+
+Two fixtures behind other add-ons are still hand-written, and `coverage.mjs`
+marks both so they cannot be mistaken for evidence.
 
 ## Regenerating
 

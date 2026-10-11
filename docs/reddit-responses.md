@@ -2,9 +2,11 @@
 
 What reddit.com actually sends, recorded so nobody has to guess it again.
 
-**The headline finding is that there is no API response to map.** The feed is
-server-rendered custom elements. This file records what that means, because the
-existing rules assume the opposite and have been reading a dead endpoint.
+**Not supported. The add-on has been removed.** It read a real endpoint that a
+browser never calls, and its fixture was written to match the rule.
+
+The headline finding is that there is no API response to map: the feed is
+server-rendered custom elements.
 
 Signed in as the user in the supplied cookie file, `/r/<sub>/` renders. Every
 `/api/`, `/svc/` and `.json` request observed across ten scrolls:
@@ -42,12 +44,12 @@ Everything else is presentation state: `view-context`, `is-awardable`,
 Video is not in these attributes. A video post renders as a
 `<shreddit-player>` element, and none were present on the pages captured.
 
-## What that means for the add-on
+## What that meant for the add-on
 
 The rules read `data.children[].data.secure_media.reddit_video`. That is the
 shape of `https://www.reddit.com/r/<sub>/.json`, the old public API. **A
 browser signed in to the web app never calls it**, zero times in every capture
-taken here.
+taken here, and no capture of any surface produced a single media-bearing body.
 
 Measured on `/r/pics/` with twenty-five posts:
 
@@ -57,11 +59,12 @@ dom rows    198
 network rows  51
 ```
 
-So image posts are found, by the document scraper and by the network sniffer,
-with no author, no permalink and no caption attached. The add-on contributes
-nothing, which is why `scripts/coverage.mjs` reports Reddit as
-"hand-written only": `reddit-post.json` was written to match the rule, and the
-rule matches nothing.
+Image posts are found, by the document scraper and by the network sniffer, with
+no author, no permalink and no caption attached.
+
+The add-on contributed nothing, so it and its hand-written fixture have been
+removed rather than left as decoration. Reddit media is not lost to Kidnap; the
+document scraper finds it. What was lost is the claim.
 
 ## Traps
 

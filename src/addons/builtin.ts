@@ -411,31 +411,6 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   },
 
   {
-    id: 'reddit',
-    name: 'Reddit',
-    hosts: ['reddit.com', 'redd.it'],
-    apiPaths: ['/api/', '/graphql', '/svc/'],
-    rules: [
-      {
-        at: 'data.children[].data.secure_media.reddit_video',
-        media: {
-          url: 'fallback_url',
-          mime: 'scrubber_media_type',
-          width: 'width',
-          height: 'height',
-          duration: 'duration',
-          caption: '^^title',
-          author: '^^author',
-          published: '^^created_utc',
-          postId: '^^id',
-          postUrl: { template: 'https://www.reddit.com{id}', values: { id: '^^permalink' } },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-    ],
-  },
-
-  {
     id: 'instagram',
     name: 'Instagram',
     hosts: ['instagram.com', 'threads.net'],
@@ -623,48 +598,6 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
     ],
   },
 
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    hosts: ['facebook.com', 'fbcdn.net'],
-    apiPaths: ['/api/graphql', '/ajax/relay-ef', '/video/unified_cvc'],
-    rewrite: [
-      {
-        host: 'video.xx.fbcdn.net',
-        removeParams: ['s', 'oe'],
-      },
-    ],
-    rules: [
-      {
-        at: 'data.video',
-        media: {
-          url: 'browser_native_hd_url',
-          mime: { literal: 'video/mp4' },
-          label: { literal: 'HD' },
-          caption: 'description',
-          author: 'from.name',
-          published: 'created_time',
-          postId: 'id',
-          postUrl: { template: 'https://www.facebook.com/watch/?v={id}', values: { id: 'id' } },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-      {
-        at: 'data.video',
-        media: {
-          url: 'browser_native_sd_url',
-          mime: { literal: 'video/mp4' },
-          label: { literal: 'SD' },
-          caption: 'description',
-          author: 'from.name',
-          published: 'created_time',
-          postId: 'id',
-          postUrl: { template: 'https://www.facebook.com/watch/?v={id}', values: { id: 'id' } },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-    ],
-  },
   {
     /*
      * Adobe Fonts has no catalogue API that anyone may call. It renders the

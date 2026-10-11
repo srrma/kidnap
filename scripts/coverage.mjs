@@ -47,7 +47,6 @@ const FIXTURES = {
   'x-bookmarks.json': ['x', 'https://x.com/i/api/graphql/abc/Bookmarks'],
   'x-thread.json': ['x', 'https://x.com/i/api/graphql/abc/ThreadedConversation'],
   'x-photo-status.json': ['x', 'https://x.com/i/api/graphql/abc/TweetResultByRestId'],
-  'reddit-post.json': ['reddit', 'https://www.reddit.com/svc/shreddit/comments/r/test/'],
   'tiktok-item.json': ['tiktok', 'https://www.tiktok.com/api/post/item_list/'],
   'imgur-gallery.json': ['imgur', 'https://api.imgur.com/3/gallery/album/abc'],
   'instagram-feed.json': ['instagram', 'https://www.instagram.com/graphql/query'],
@@ -56,7 +55,6 @@ const FIXTURES = {
     'https://www.instagram.com/discover/web/explore_grid/',
   ],
   'bsky-feed.json': ['bsky', 'https://public.api.bsky.app/xrpc/app.bsky.feed.getTimeline'],
-  'facebook-video.json': ['facebook', 'https://www.facebook.com/video/unified_cvc/'],
   'pinterest-home.json': [
     'pinterest',
     'https://www.pinterest.com/resource/UserHomefeedResource/get/',
@@ -79,10 +77,8 @@ const HAND_WRITTEN = new Set([
   'x-status.json',
   'x-thread.json',
   'x-photo-status.json',
-  'reddit-post.json',
   'tiktok-item.json',
   'imgur-gallery.json',
-  'facebook-video.json',
 ]);
 
 const registry = new AddonRegistry(BUILTIN_ADDONS);

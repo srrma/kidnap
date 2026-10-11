@@ -245,9 +245,9 @@ session.
 Instagram is in the same position, and for the same reason:
 [Instagram responses](docs/instagram-responses.md).
 
-[Facebook responses](docs/facebook-responses.md) records what was captured and
-what was not: the feed handed over no media at all, so no rule there has been
-run against a real response yet.
+[Facebook responses](docs/facebook-responses.md) and
+[Reddit responses](docs/reddit-responses.md) record two removed add-ons: both
+read endpoints that a signed-in browser never calls.
 
 [Reddit responses](docs/reddit-responses.md) is the odd one out: its feed is
 server-rendered custom elements, so its existing rules read an endpoint a
