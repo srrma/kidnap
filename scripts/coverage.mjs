@@ -13,18 +13,36 @@
  * real site, how many rows come out, and do they carry the metadata a person
  * would recognise them by?
  *
- *   node scripts/coverage.mjs
+ *   npm run coverage
  *
  * Rows of zero are not a failure on their own. They mean the fixture is not
  * exercising the add-on, which is worth knowing and is printed as such rather
  * than hidden behind a passing suite.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { registerHooks } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BUILTIN_ADDONS } from '../src/addons/builtin.ts';
-import { AddonRegistry } from '../src/addons/engine.ts';
+
+/*
+ * The source imports its siblings without a file extension, which the bundler
+ * resolves and bare Node does not. Registering the extension is what lets this
+ * script read the real add-on engine rather than a copy of it.
+ */
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (!specifier.startsWith('.') || specifier.endsWith('.ts'))
+      return nextResolve(specifier, context);
+    const candidate = new URL(`${specifier}.ts`, context.parentURL);
+    return existsSync(fileURLToPath(candidate))
+      ? { url: candidate.href, shortCircuit: true }
+      : nextResolve(specifier, context);
+  },
+});
+
+const { BUILTIN_ADDONS } = await import('../src/addons/builtin.ts');
+const { AddonRegistry } = await import('../src/addons/engine.ts');
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const fixtures = resolve(root, 'tests/fixtures');

@@ -28,7 +28,7 @@ export function scheduleBadge(tabId: number): void {
   );
 }
 
-export async function refreshBadge(tabId: number): Promise<void> {
+async function refreshBadge(tabId: number): Promise<void> {
   if (!supportsBadge()) return;
   try {
     const count = await store.count(tabId);

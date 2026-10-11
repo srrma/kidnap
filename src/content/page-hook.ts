@@ -13,6 +13,8 @@
  * and means a bug here cannot touch page data.
  */
 
+import { hasKnownExtension } from '../core/kind';
+
 interface HookWindow extends Window {
   __kidnapHook?: boolean;
   __kidnapStats?: Record<string, number>;
@@ -39,10 +41,6 @@ const scope = window as HookWindow;
      silently shows nothing. */
   const stats = { configAt: 0, watched: 0, apiSeen: 0, apiSent: 0, mediaSent: 0 };
   scope.__kidnapStats = stats;
-
-  const MANIFEST = /\.(?:m3u8|mpd)(?:$|[?#])/i;
-  const MEDIA =
-    /\.(?:jpe?g|png|gif|webp|avif|svg|bmp|ico|mp4|m4v|webm|mov|mkv|mp3|m4a|aac|ogg|oga|opus|wav|flac|pdf)(?:$|[?#])/i;
 
   function send(type: string, detail: Record<string, unknown>): void {
     try {
@@ -78,7 +76,7 @@ const scope = window as HookWindow;
     if (reported.size > MAX_REPORTED) return;
     const href = absolute(url);
     if (!href || reported.has(href)) return;
-    if (!MANIFEST.test(href) && !MEDIA.test(href)) return;
+    if (!hasKnownExtension(href)) return;
     reported.add(href);
     send('media', { url: href });
   }

@@ -15,7 +15,6 @@ import type {
   MediaItem,
   MediaSpec,
   RewriteSpec,
-  RuleSpec,
   UrlTemplate,
 } from '../core/types';
 import { hostMatches, hostMatchesAny, parse, pathMatches } from '../core/url';
@@ -483,10 +482,3 @@ function isUrlValue(value: unknown): boolean {
 function isStringArray(value: unknown): boolean {
   return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
 }
-
-/** Convenience for tests and for the panel's add-on preview. */
-export function describeRule(rule: RuleSpec): string {
-  return `${rule.at} -> ${rule.media.url}`;
-}
-
-export { pluck, read };

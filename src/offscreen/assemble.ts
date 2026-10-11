@@ -23,7 +23,6 @@ import {
   UrlSource,
 } from 'mediabunny';
 import { on, post } from '../bus/protocol';
-import type { StreamChoice } from '../core/types';
 
 interface Job {
   url: string;
@@ -50,53 +49,12 @@ function source(url: string, concurrency: number): UrlSource {
   });
 }
 
-async function choicesOf(input: Input): Promise<StreamChoice[]> {
-  const video = await input.getPrimaryVideoTrack();
-  const audio = await input.getPrimaryAudioTrack();
-  const primary = video ?? audio;
-  if (!primary) return [];
-
-  const width = video ? await video.getDisplayWidth() : undefined;
-  const height = video ? await video.getDisplayHeight() : undefined;
-  const bitrate = (await primary.getAverageBitrate()) ?? undefined;
-
-  return [
-    {
-      index: 0,
-      label:
-        [
-          width && height ? `${width}x${height}` : undefined,
-          bitrate ? `${Math.round(bitrate / 1000)} kbps` : undefined,
-        ]
-          .filter(Boolean)
-          .join('  ') || 'Original',
-      width,
-      height,
-      bitrate,
-    },
-  ];
-}
-
 async function run(jobId: string, job: Job): Promise<void> {
   post('assemble:progress', { jobId, progress: 0.02, detail: 'Reading the manifest' });
 
   const input = new Input({ source: source(job.url, job.concurrency), formats: ALL_FORMATS });
   job.input = input;
-
-  const choices = await choicesOf(input);
-  if (job.cancelled) return;
-
-  if (choices.length > 1) {
-    post('assemble:choices', { jobId, choices });
-    const picked = await waitForChoice(jobId);
-    if (picked === -1) {
-      post('assemble:failed', { jobId, error: 'Cancelled' });
-      return;
-    }
-    post('assemble:progress', { jobId, progress: 0.05, detail: 'Fetching segments' });
-  } else {
-    post('assemble:progress', { jobId, progress: 0.05, detail: 'Fetching segments' });
-  }
+  post('assemble:progress', { jobId, progress: 0.05, detail: 'Fetching segments' });
 
   const output = new Output({
     format: new Mp4OutputFormat({ fastStart: 'in-memory' }),
@@ -139,22 +97,6 @@ async function run(jobId: string, job: Job): Promise<void> {
   post('assemble:done', { jobId, blobUrl: URL.createObjectURL(blob), filename: job.filename });
 }
 
-/** Resolves when the panel answers, or rejects when the job is cancelled. */
-function waitForChoice(jobId: string): Promise<number> {
-  return new Promise((resolve) => {
-    const off = (value: number): void => {
-      clearInterval(poll);
-      resolve(value);
-    };
-    const poll = setInterval(() => {
-      if (jobs.get(jobId)?.cancelled) off(-1);
-    }, 200);
-    choices.set(jobId, off);
-  });
-}
-
-const choices = new Map<string, (value: number) => void>();
-
 export function startAssembling(): void {
   on('assemble:start', (payload) => {
     const job: Job = {
@@ -170,9 +112,11 @@ export function startAssembling(): void {
     });
   });
 
-  on('assemble:choose', ({ jobId, index }) => {
-    choices.get(jobId)?.(index);
-    choices.delete(jobId);
+  on('assemble:cancel', ({ jobId }) => {
+    const job = jobs.get(jobId);
+    if (!job) return;
+    job.cancelled = true;
+    void job.conversion?.cancel().catch(() => {});
   });
 
   addEventListener('unload', () => {

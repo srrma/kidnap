@@ -7,9 +7,9 @@ import { DEFAULT_SETTINGS } from '../src/store/settings';
 
 /*
  * Every response below was taken from a real signed-in x.com timeline. The
- * point of this file is that these shapes keep working, because the ones that
- * used to slip through were found by loading the extension against the site,
- * not by reading the code.
+ * point of this file is that these shapes keep working: a shape that slips
+ * through is found by loading the extension against the site, not by reading
+ * the code.
  */
 
 const notes: string[] = [];

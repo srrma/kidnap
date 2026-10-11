@@ -27,7 +27,7 @@ export function parse(url: string): URL | null {
   }
 }
 
-export function hostOf(url: string): string | null {
+function hostOf(url: string): string | null {
   return parse(url)?.hostname.toLowerCase() ?? null;
 }
 
@@ -92,8 +92,8 @@ export function fileNameOf(url: string): string | undefined {
 }
 
 /**
- * Origin used to mute a site. A host is the unit, not the full origin, so
- * muting example.com also covers its www form and every subdomain.
+ * Muting is per host, not per origin, so muting example.com also covers its
+ * www form and every subdomain.
  */
 export function originKey(url: string): string | null {
   const host = hostOf(url);
@@ -101,19 +101,9 @@ export function originKey(url: string): string | null {
   return host.replace(/^www\./, '');
 }
 
-export function isRoutable(url: string): boolean {
-  const parsed = parse(url);
-  return !!parsed && (parsed.protocol === 'http:' || parsed.protocol === 'https:');
-}
-
 /** Bytes requested in a Range header. Such a request is never a whole file. */
 export function isByteRange(url: string): boolean {
   return /[?&](?:bytes|bytestart|byteend|range)=/i.test(url);
-}
-
-export function hasExtensionInfo(url: string): boolean {
-  const ext = parse(url)?.pathname.match(/\.([a-z0-9]{2,5})$/i)?.[1];
-  return ext !== undefined;
 }
 
 /**

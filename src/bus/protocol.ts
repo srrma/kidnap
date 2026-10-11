@@ -14,7 +14,6 @@ import type {
   MediaItem,
   PageContext,
   Settings,
-  StreamChoice,
   StreamJob,
   TabJobs,
 } from '../core/types';
@@ -42,9 +41,8 @@ export interface Messages {
   'addons:list': { req: void; res: { builtin: AddonSpec[]; user: AddonSpec[] } };
   'jobs:get': { req: { tabId: number }; res: TabJobs };
   'download:direct': { req: { items: MediaItem[] }; res: { queued: number } };
-  'download:stream': { req: { item: MediaItem; choice?: number }; res: { jobId: string } };
+  'download:stream': { req: { item: MediaItem }; res: { jobId: string } };
   'job:cancel': { req: { id: string }; res: void };
-  'stream:choose': { req: { jobId: string; index: number }; res: void };
 
   /* background into the offscreen document or the panel page */
   'assemble:start': {
@@ -57,7 +55,7 @@ export interface Messages {
     };
     res: void;
   };
-  'assemble:choose': { req: { jobId: string; index: number }; res: void };
+  'assemble:cancel': { req: { jobId: string }; res: void };
   /*
    * The offscreen document announces itself once its listeners exist. Work
    * posted before that is dropped, because nothing is listening yet.
@@ -66,7 +64,6 @@ export interface Messages {
 
   /* the assembler reporting back */
   'assemble:progress': { req: { jobId: string; progress: number; detail?: string }; res: void };
-  'assemble:choices': { req: { jobId: string; choices: StreamChoice[] }; res: void };
   'assemble:done': { req: { jobId: string; blobUrl: string; filename: string }; res: void };
   'assemble:failed': { req: { jobId: string; error: string }; res: void };
 
@@ -75,6 +72,14 @@ export interface Messages {
     res: void;
   };
 }
+
+/*
+ * Declared as a value as well as a type, so an incoming message name can be
+ * checked against the set this build actually ships.
+ */
+export const Messages = {} as unknown as {
+  readonly [K in MessageName]: unknown;
+};
 
 export type MessageName = keyof Messages;
 
@@ -85,19 +90,45 @@ interface Envelope<K extends MessageName> {
 
 let listenerInstalled = false;
 
+const names: ReadonlySet<string> = new Set(Object.keys(Messages));
+
+/**
+ * Narrows an incoming message rather than asserting it.
+ *
+ * A message from another extension context is `unknown` until it is checked.
+ * The name has to be one this build declared, and the payload has to be an
+ * object, or the message did not come from this contract and is dropped.
+ */
+function isEnvelope(raw: unknown): raw is { to: MessageName; payload: unknown } {
+  if (typeof raw !== 'object' || raw === null) return false;
+  const { to, payload } = raw as { to?: unknown; payload?: unknown };
+  return (
+    typeof to === 'string' && names.has(to) && typeof payload === 'object' && payload !== null
+  );
+}
+
+interface Reply {
+  ok: boolean;
+  value?: unknown;
+  error?: string;
+}
+
+function isReply(raw: unknown): raw is Reply {
+  return typeof raw === 'object' && raw !== null && 'ok' in raw;
+}
+
 function installListener(): void {
   if (listenerInstalled) return;
   listenerInstalled = true;
 
-  api.runtime.onMessage.addListener((raw, sender, sendResponse) => {
-    const envelope = raw as Partial<Envelope<MessageName>>;
-    if (typeof envelope?.to !== 'string') return false;
+  api.runtime.onMessage.addListener((raw: unknown, sender, sendResponse) => {
+    if (!isEnvelope(raw)) return false;
 
-    const handler = handlers.get(envelope.to);
+    const handler = handlers.get(raw.to);
     if (!handler) return false;
 
     try {
-      const result = handler(envelope.payload as never, sender);
+      const result = handler(raw.payload as never, sender);
       if (result === undefined) {
         sendResponse({ ok: true });
         return false;
@@ -143,14 +174,11 @@ export function request<K extends MessageName>(
           reject(new Error(lastError.message));
           return;
         }
-        const envelope = response as
-          | { ok?: boolean; value?: unknown; error?: string }
-          | undefined;
-        if (!envelope?.ok) {
-          reject(new Error(envelope?.error ?? 'no response'));
+        if (!isReply(response) || !response.ok) {
+          reject(new Error((isReply(response) ? response.error : undefined) ?? 'no response'));
           return;
         }
-        resolve(envelope.value as Messages[K]['res']);
+        resolve(response.value as Messages[K]['res']);
       });
     } catch (error) {
       reject(error instanceof Error ? error : new Error(String(error)));

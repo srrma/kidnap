@@ -752,7 +752,10 @@ async function run(site) {
   }
 
   if (process.env.SAVE) {
-    const out = resolve(root, `captures/${site.id}-responses.json`);
+    const out = resolve(
+      process.env.KIDNAP_CAPTURES ?? resolve(root, 'captures'),
+      `${site.id}-responses.json`,
+    );
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, `${JSON.stringify(report, null, 2)}\n`);
     console.error(`written: ${out}`);

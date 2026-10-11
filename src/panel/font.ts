@@ -164,7 +164,10 @@ const LINES: Array<{ text: string; className?: string }> = [
   { text: 'The quick brown fox jumps over the lazy dog', className: 'specimen-sentence' },
   { text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', className: 'specimen-set' },
   { text: 'abcdefghijklmnopqrstuvwxyz', className: 'specimen-set' },
-  { text: '0123456789 &@#%€£¥ .,;:!?—–()[]{}"\'', className: 'specimen-set' },
+  {
+    text: '0123456789 &@#%\u20ac\u00a3\u00a5 .,:;!? \u2014 \u2013 ()[]{}"',
+    className: 'specimen-set',
+  },
 ];
 
 export interface Specimen {

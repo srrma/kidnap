@@ -69,14 +69,14 @@ describe('contrast', () => {
   };
 
   it('every tile label passes AA in the light theme', () => {
-    for (const [kind, colour] of Object.entries(LIGHT)) {
-      expect(ratio(colour, '#f7f7f8'), `${kind} on light surface`).toBeGreaterThanOrEqual(4.5);
+    for (const [kind, color] of Object.entries(LIGHT)) {
+      expect(ratio(color, '#f7f7f8'), `${kind} on light surface`).toBeGreaterThanOrEqual(4.5);
     }
   });
 
   it('every tile label passes AA in the dark theme', () => {
-    for (const [kind, colour] of Object.entries(DARK)) {
-      expect(ratio(colour, '#1d1c24'), `${kind} on dark surface`).toBeGreaterThanOrEqual(4.5);
+    for (const [kind, color] of Object.entries(DARK)) {
+      expect(ratio(color, '#1d1c24'), `${kind} on dark surface`).toBeGreaterThanOrEqual(4.5);
     }
   });
 });

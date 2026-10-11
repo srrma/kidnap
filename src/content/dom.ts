@@ -8,7 +8,7 @@
  */
 
 import type { RawItem } from '../bus/protocol';
-import { guessMime } from '../core/kind';
+import { guessMime, hasKnownExtension } from '../core/kind';
 import type { PageContext } from '../core/types';
 
 const MEDIA_TAGS = 'img,video,audio,source,picture,track';
@@ -188,11 +188,13 @@ function collectLinks(document: Document, items: RawItem[], seen: Set<string>): 
   }
 }
 
-const FILE_EXT =
-  /\.(?:jpe?g|png|gif|webp|avif|svg|bmp|mp4|m4v|webm|mov|mkv|mp3|m4a|aac|ogg|oga|opus|wav|flac|pdf|epub|csv|zip|m3u8|mpd)(?:$|[?#])/i;
+/* A download link is often an archive rather than media, which is why zip is
+   matched here and not in the shared extension table. */
+const ARCHIVE = /\.zip(?:$|[?#])/i;
 
 function looksLikeFile(value: string): boolean {
-  return FILE_EXT.test(value.split('?')[0] ?? value);
+  const path = value.split('?')[0] ?? value;
+  return hasKnownExtension(path) || ARCHIVE.test(path);
 }
 
 function resolve(value: string, base: Element): string | null {

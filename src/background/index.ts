@@ -7,8 +7,8 @@
 
 import { BUILTIN_ADDONS } from '../addons/builtin';
 import { AddonRegistry, validateAddon } from '../addons/engine';
-import { on, post, request } from '../bus/protocol';
-import type { AddonSpec, MediaItem, Settings } from '../core/types';
+import { on } from '../bus/protocol';
+import type { MediaItem, Settings } from '../core/types';
 import { api } from '../platform';
 import { load as loadSettings, onChange, save as saveSettings } from '../store/settings';
 import * as store from '../store/tab';
@@ -141,8 +141,7 @@ function tabIdOf(sender: chrome.runtime.MessageSender): number | undefined {
 
 /**
  * Files what an add-on found. The add-on has already resolved every field it
- * knows, so all of it is carried through to storage rather than the handful
-
+ * knows, so all of it is carried through to storage.
  */
 function absorb(tabId: number, items: MediaItem[]): void {
   diag.items += items.length;
@@ -240,7 +239,10 @@ on('settings:set', async (changes) => {
 });
 on('addons:list', () => ({
   builtin: [...BUILTIN_ADDONS],
-  user: settings.userAddons.filter((spec) => validateAddon(spec).ok) as AddonSpec[],
+  user: settings.userAddons.flatMap((spec) => {
+    const checked = validateAddon(spec);
+    return checked.ok ? [checked.spec] : [];
+  }),
 }));
 on('jobs:get', async ({ tabId }) => store.jobs(tabId));
 
@@ -268,7 +270,7 @@ api.runtime.onInstalled.addListener(() => {
  * popup only ever restated a count and pointed here.
  *
  * Set on every worker start rather than only on install: the worker is torn
- * down constantly, and re-asserting the behaviour is cheap and idempotent.
+ * down constantly, and re-asserting the behavior is cheap and idempotent.
  * Firefox has no sidePanel API at all, so the check is a capability test
  * rather than a browser test.
  */
@@ -276,6 +278,4 @@ if (api.sidePanel?.setPanelBehavior) {
   void api.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 }
 
-wireJobs({ getSettings: () => settings, post });
-
-export { addons, post, record, request, store };
+wireJobs();

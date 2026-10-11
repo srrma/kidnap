@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "minimum_chrome_version": "116",
   "description": "Detect, preview and download images, video, audio, streams and documents from any page. Runs entirely on your machine.",
-  "homepage_url": "https://github.com/kidnap/kidnap",
+  "homepage_url": "https://github.com/srrma/kidnap",
   "permissions": [
     "webRequest",
     "storage",

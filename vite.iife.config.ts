@@ -28,7 +28,8 @@ export default defineConfig({
     emptyOutDir: false,
     target: 'chrome116',
     minify: 'esbuild',
-    sourcemap: true,
+    // See vite.config.ts: maps are for the developer's own debugging.
+    sourcemap: process.env.KIDNAP_RELEASE !== '1',
     cssCodeSplit: false,
     lib: {
       entry: inputs[entry as keyof typeof inputs] ?? inputs.content,

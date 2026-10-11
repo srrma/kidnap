@@ -8,7 +8,7 @@
  */
 
 import { BUILTIN_ADDONS } from '../addons/builtin';
-import { on, post, request } from '../bus/protocol';
+import { post, request } from '../bus/protocol';
 import { guessMime } from '../core/kind';
 import type { Settings } from '../core/types';
 import { api } from '../platform';
@@ -233,8 +233,6 @@ function followNavigation(): void {
     };
   }
 }
-
-on('dom:media', () => {});
 
 injectHook();
 awaitHook();

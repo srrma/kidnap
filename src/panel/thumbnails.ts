@@ -66,10 +66,6 @@ export function cached(url: string): string | undefined {
   return cache.get(url);
 }
 
-export function hasFailed(url: string): boolean {
-  return failed.has(url);
-}
-
 /**
  * Requests a poster, calling back only if one arrives that is not already
  * cached. Generation is queued, so calling this for two hundred visible rows

@@ -6,8 +6,9 @@
  * rather than shipped as a control that quietly does nothing.
  */
 
+import { validateAddon } from '../addons/engine';
 import { request } from '../bus/protocol';
-import type { AddonSpec, Settings } from '../core/types';
+import type { Settings } from '../core/types';
 import { DEFAULT_SETTINGS } from '../store/settings';
 import { el, sheet, toast } from './dom';
 
@@ -76,7 +77,8 @@ function strictnessField(draft: Settings): HTMLElement {
     node.append(el('option', { value, selected: value === draft.strictness }, [text]));
   }
   node.addEventListener('change', () => {
-    draft.strictness = node.value as Settings['strictness'];
+    const picked = options.find(([value]) => value === node.value);
+    if (picked) draft.strictness = picked[0];
   });
   return field(
     'How much to hide',
@@ -200,7 +202,24 @@ function addonsField(draft: Settings): HTMLElement {
     try {
       const parsed: unknown = JSON.parse(text);
       if (!Array.isArray(parsed)) throw new Error('Expected a list of add-ons.');
-      draft.userAddons = parsed as AddonSpec[];
+
+      /*
+       * Typed JSON from a textarea is untrusted the same way a page's is, so
+       * it goes through the same validator. Anything that fails is reported by
+       * name rather than saved and rejected later.
+       */
+      const accepted = [];
+      for (const entry of parsed) {
+        const checked = validateAddon(entry);
+        if (!checked.ok) {
+          const name = (entry as { name?: unknown }).name;
+          throw new Error(
+            `The add-on ${typeof name === 'string' ? name : ''} ${checked.error}.`,
+          );
+        }
+        accepted.push(checked.spec);
+      }
+      draft.userAddons = accepted;
       error.hidden = true;
     } catch (problem) {
       error.textContent =

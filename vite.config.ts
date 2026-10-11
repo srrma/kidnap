@@ -14,7 +14,9 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'chrome116',
     minify: 'esbuild',
-    sourcemap: true,
+    // Release builds ship without maps. A published package is 3.9 MB with them
+    // and 0.5 MB without, and the extra weight buys a downloader nothing.
+    sourcemap: process.env.KIDNAP_RELEASE !== '1',
     // Vite's polyfill touches document and window at module scope, which a
     // service worker does not have. Chrome 116 supports modulepreload natively,
     // so there is nothing to polyfill.

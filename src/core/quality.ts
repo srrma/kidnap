@@ -15,10 +15,6 @@ export function pixels(item: { width?: number; height?: number }): number {
   return item.width * item.height;
 }
 
-export function qualityRank(item: MediaItem): number {
-  return pixels(item) || item.bytes || 0;
-}
-
 /**
  * Reduces a raw sighting list to the rows to show. Later sightings of the same
  * URL merge into the first rather than replacing it, so the richest metadata

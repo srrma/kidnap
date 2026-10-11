@@ -10,8 +10,7 @@
 import { classify, guessMime, isManifestUrl } from '../core/kind';
 import { isNoise } from '../core/noise';
 import type { Detector, MediaItem, Settings } from '../core/types';
-import { canonical, dimensionsFromUrl, displayHost, fileNameOf, originKey } from '../core/url';
-import { hashOf } from '../store/tab';
+import { dimensionsFromUrl, fileNameOf, originKey } from '../core/url';
 
 export interface Report {
   url: string;
@@ -106,8 +105,4 @@ export function isMuted(url: string, settings: Settings): boolean {
   const host = originKey(url);
   if (!host) return false;
   return settings.mutedHosts.some((muted) => host === muted || host.endsWith(`.${muted}`));
-}
-
-export function describe(item: MediaItem): string {
-  return `${item.kind}:${displayHost(canonical(item.url))}:${hashOf(item.url)}`;
 }

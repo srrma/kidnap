@@ -20,6 +20,25 @@ function extract(apiUrl: string, body: unknown, tabId = 1): MediaItem[] {
   return registry.extract(apiUrl, body, tabId, 1_750_000_000_000);
 }
 
+/**
+ * Runs one assertion against every fixture a site serves, so a surface nobody
+ * thought to cover is a missing entry rather than a silently absent test.
+ *
+ * `check` gets the rows and says what is true of every one of them.
+ */
+function eachSurface(
+  surfaces: Array<[name: string, file: string, url: string]>,
+  check: (items: MediaItem[]) => void,
+): void {
+  for (const [name, file, url] of surfaces) {
+    it(`reads media from the ${name}, as the site serves it`, () => {
+      const items = extract(url, fixture(file));
+      expect(items.length).toBeGreaterThan(0);
+      check(items);
+    });
+  }
+}
+
 describe('paths', () => {
   const tree = { a: { b: [{ c: 1 }, { c: 2 }] }, top: 'x' };
 
@@ -124,9 +143,8 @@ describe('builtin addons', () => {
    *
    * These fixtures are cut from real responses rather than written to match a
    * rule, which is the only arrangement that catches a rule written to match a
-   * fixture. The previous search fixture was built by hand from a real
-   * skeleton, and being hand built it had the wrong nesting, so the search
-   * rule passed its test while matching nothing on the site.
+   * fixture. A hand-built fixture with the wrong nesting lets a rule pass its
+   * test while matching nothing on the site.
    */
   const TIMELINES: Array<[string, string]> = [
     ['x-home-timeline.json', 'HomeTimeline'],
@@ -639,12 +657,8 @@ describe('adobe fonts', () => {
 
 describe('instagram', () => {
   /*
-   * The rules used to read `items[]`, which is what the old api/v1/feed/user
-   * endpoints return. Nothing on instagram.com serves that now: measured
-   * against real bodies the old rules extracted zero rows, from the feed and
-   * from explore alike, while passing every test that had been written for
-   * them. These fixtures are cut from captured responses so that cannot
-   * happen again.
+   * These fixtures are cut from captured responses, not written to match a
+   * rule, so a rule that stops matching a real body fails here.
    */
   const CASES: Array<[string, string, string]> = [
     ['feed', 'instagram-feed.json', 'https://www.instagram.com/graphql/query'],
@@ -655,21 +669,16 @@ describe('instagram', () => {
     ],
   ];
 
-  for (const [name, file, url] of CASES) {
-    it(`reads media from the ${name}, as the site serves it`, () => {
-      const items = extract(url, fixture(file));
-      expect(items.length).toBeGreaterThan(0);
-
-      for (const item of items) {
-        expect(item.detector).toBe('addon');
-        expect(item.author, `no author on ${item.url}`).toBe('sample user');
-        expect(item.caption).toBeTruthy();
-        expect(item.pageUrl).toMatch(/^https:\/\/www\.instagram\.com\/p\/SAMPLECODE/);
-        expect(item.width).toBeGreaterThan(0);
-        expect(item.height).toBeGreaterThan(0);
-      }
-    });
-  }
+  eachSurface(CASES, (items) => {
+    for (const item of items) {
+      expect(item.detector).toBe('addon');
+      expect(item.author, `no author on ${item.url}`).toBe('sample user');
+      expect(item.caption).toBeTruthy();
+      expect(item.pageUrl).toMatch(/^https:\/\/www\.instagram\.com\/p\/SAMPLECODE/);
+      expect(item.width).toBeGreaterThan(0);
+      expect(item.height).toBeGreaterThan(0);
+    }
+  });
 
   it('reads a carousel, whose children carry no author of their own', () => {
     const items = extract(
@@ -718,9 +727,8 @@ describe('pinterest', () => {
   /*
    * Pinterest answers every feed with resource_response.data and keeps the same
    * pin shape on all of them, so the home feed and search differ only by one
-   * segment. Both fixtures are cut from a signed-in capture: 24 pins came back
-   * from the home feed and 25 from a search, every one carrying six image
-   * renditions.
+   * segment. Both fixtures are cut from a signed-in capture and are trimmed to
+   * three pins each.
    */
   const CASES: Array<[string, string, string]> = [
     [
@@ -735,29 +743,23 @@ describe('pinterest', () => {
     ],
   ];
 
-  for (const [name, file, url] of CASES) {
-    it(`reads pins from the ${name}, as the site serves them`, () => {
-      const items = extract(url, fixture(file));
-      expect(items.length).toBeGreaterThan(0);
+  eachSurface(CASES, (items) => {
+    for (const item of items) {
+      expect(item.detector).toBe('addon');
+      expect(item.kind).toBe('image');
+      expect(item.url).toContain('i.pinimg.com/originals/');
+      expect(item.author).toBe('sample_user');
+      expect(item.caption).toBeTruthy();
+      expect(item.pageUrl).toMatch(/^https:\/\/www\.pinterest\.com\/pin\//);
+    }
 
-      for (const item of items) {
-        expect(item.detector).toBe('addon');
-        expect(item.kind).toBe('image');
-        expect(item.url).toContain('i.pinimg.com/originals/');
-        expect(item.author).toBe('sample_user');
-        expect(item.caption).toBeTruthy();
-        expect(item.pageUrl).toMatch(/^https:\/\/www\.pinterest\.com\/pin\//);
-      }
-
-      /*
-       * `orig` rather than one of the grid renditions: 236x, 474x and 736x are
-       * what the feed displays, and saving one of those would quietly discard
-       * most of the image.
-       */
-      const [first] = items;
-      expect(first?.width).toBeGreaterThan(736);
-    });
-  }
+    /*
+     * `orig` rather than one of the grid renditions: 236x, 474x and 736x are
+     * what the feed displays, and saving one of those would quietly discard
+     * most of the image.
+     */
+    expect(items[0]?.width).toBeGreaterThan(736);
+  });
 
   it('reads the publication date, which arrives in RFC 2822 form', () => {
     const [item] = extract(
@@ -770,10 +772,9 @@ describe('pinterest', () => {
 
 describe('behance', () => {
   /*
-   * Both fixtures come from one signed-in session: 48 projects from the feed and
-   * 48 from a search. Behance answers both through the same /v3/graphql
-   * endpoint under two different roots, and the project fields are identical
-   * either way.
+   * Both fixtures come from one signed-in session and are trimmed to three
+   * projects each. Behance answers both through the same /v3/graphql endpoint
+   * under two different roots, and the project fields are identical either way.
    */
   const CASES: Array<[string, string]> = [
     ['feed', 'behance-feed.json'],
@@ -798,9 +799,9 @@ describe('behance', () => {
 
   it('takes the original cover rather than the smallest rendition', () => {
     /*
-     * A project carries fourteen renditions. The original is first in 48 of 48
-     * projects captured, and that ordering is the whole reason `[0]` is right
-     * rather than lucky, so it is asserted rather than assumed.
+     * A project carries several renditions and the original leads the list.
+     * That ordering is the whole reason `[0]` is right rather than lucky, so it
+     * is asserted rather than assumed.
      */
     const body = fixture('behance-feed.json') as {
       data: {

@@ -241,8 +241,8 @@ function header(count: number): HTMLElement {
 
   /*
    * The way out of selection mode is a control in the same place as the way
-   * in. It used to swap itself out for the bulk actions, which left anyone who
-   * entered it with no way back except reloading the page.
+   * in. Swapping it for the bulk actions would leave anyone who entered it with
+   * no way back except reloading the page.
    */
   const bulk: Node[] = state.selecting
     ? [
@@ -705,7 +705,7 @@ async function saveAsTtf(item: MediaItem): Promise<void> {
   }
 }
 
-export function describeItem(item: MediaItem): string {
+function describeItem(item: MediaItem): string {
   return `${item.kind}, ${item.name ?? item.url}`;
 }
 
@@ -723,11 +723,12 @@ function renderQueue(): HTMLElement | null {
     'aria-label': 'Downloads in progress',
   });
   for (const job of active) {
+    /* Only a stream reports progress. A direct download is handed to the
+       browser, which owns its own progress, so the bar is indeterminate. */
     const stream = 'progress' in job ? job : undefined;
-    const name = stream ? stream.filename : (job as DirectJob).filename;
     const detail = stream
       ? `${stateWord(stream.state)}${stream.detail ? `, ${stream.detail}` : ''}`
-      : stateWord((job as DirectJob).state);
+      : stateWord(job.state);
 
     const fill = el('div', {
       class: 'bar-fill',
@@ -738,7 +739,7 @@ function renderQueue(): HTMLElement | null {
     box.append(
       el('div', { class: 'queue-row' }, [
         el('div', {}, [
-          el('div', { class: 'queue-name', title: name }, [name]),
+          el('div', { class: 'queue-name', title: job.filename }, [job.filename]),
           el('div', { class: 'queue-detail' }, [detail]),
           el('div', { class: 'bar-track' }, [fill]),
         ]),
@@ -747,7 +748,7 @@ function renderQueue(): HTMLElement | null {
           {
             class: 'act-quiet',
             type: 'button',
-            'aria-label': `Cancel ${name}`,
+            'aria-label': `Cancel ${job.filename}`,
             onClick: () => void request('job:cancel', { id: job.id }),
           },
           ['Cancel'],
@@ -765,10 +766,6 @@ function stateWord(state: DirectJob['state'] | StreamJob['state']): string {
     case 'running':
     case 'fetching':
       return 'Downloading';
-    case 'muxing':
-      return 'Finishing';
-    case 'saving':
-      return 'Saving';
     case 'done':
       return 'Done';
     case 'failed':

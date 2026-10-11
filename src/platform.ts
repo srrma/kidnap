@@ -31,10 +31,6 @@ export function supportsBadge(): boolean {
   return typeof api.action?.setBadgeText === 'function';
 }
 
-export function isFirefox(): boolean {
-  return global.browser !== undefined && global.chrome === undefined;
-}
-
 const isExtensionPage = (url: string | undefined): boolean =>
   url?.startsWith('chrome-extension://') === true ||
   url?.startsWith('moz-extension://') === true ||
@@ -70,9 +66,4 @@ export async function activeTabId(): Promise<number | null> {
   }
 
   return typeof active.id === 'number' ? active.id : null;
-}
-
-/** The permalink that points the panel at a specific tab. */
-export function panelUrlFor(tabId: number): string {
-  return api.runtime.getURL(`panel/index.html?tabId=${tabId}`);
 }

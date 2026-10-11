@@ -38,12 +38,23 @@ function jobsKey(tabId: number): string {
   return `${JOBS}${SEP}${tabId}`;
 }
 
-export function tabPrefix(tabId: number): string {
-  return `${SEP}${tabId}${SEP}`;
-}
-
 /** How long to sit on pending writes before flushing them as one batch. */
 const FLUSH_MS = 150;
+
+/**
+ * Reads a key back out of storage.session.
+ *
+ * The storage area is untyped, so this is the one place where a value written
+ * by us is claimed to be the shape we wrote. Every other read goes through here.
+ */
+function read<T>(stored: Record<string, unknown>, key: string, fallback: T): T {
+  const value = stored[key];
+  return value === undefined ? fallback : (value as T);
+}
+
+function indexOf(stored: Record<string, unknown>, tabId: number): string[] {
+  return read(stored, indexKey(tabId), []);
+}
 
 interface Pending {
   items: Map<string, MediaItem>;
@@ -92,7 +103,7 @@ async function knownHashes(tabId: number): Promise<Set<string>> {
   let known = hashesByTab.get(tabId);
   if (known) return known;
   const stored = await api.storage.session.get(indexKey(tabId));
-  const list = (stored[indexKey(tabId)] as string[] | undefined) ?? [];
+  const list = indexOf(stored, tabId);
   known = new Set(list);
   hashesByTab.set(tabId, known);
   return known;
@@ -102,10 +113,7 @@ async function knownHashes(tabId: number): Promise<Set<string>> {
  * Records an item. Returns true when it was not already present, which is the
  * only signal the badge and the UI need.
  */
-export function add(
-  tabId: number,
-  partial: Omit<MediaItem, 'id' | 'normalized'> & { normalized?: never },
-): Promise<boolean> {
+export function add(tabId: number, partial: Omit<MediaItem, 'id'>): Promise<boolean> {
   return serialise(tabId, async () => {
     const known = await knownHashes(tabId);
     const hash = hash64(canonical(partial.url));
@@ -159,7 +167,7 @@ async function flushNow(tabId: number): Promise<void> {
     await api.storage.session.set(keys);
 
     const stored = await api.storage.session.get(indexKey(tabId));
-    const existing = (stored[indexKey(tabId)] as string[] | undefined) ?? [];
+    const existing = indexOf(stored, tabId);
     await api.storage.session.set({ [indexKey(tabId)]: [...existing, ...batch.keys()] });
   })();
 
@@ -181,7 +189,7 @@ export function settle(tabId?: number): Promise<void> {
 export async function list(tabId: number): Promise<MediaItem[]> {
   await settle(tabId);
   const index = await api.storage.session.get(indexKey(tabId));
-  const hashes = (index[indexKey(tabId)] as string[] | undefined) ?? [];
+  const hashes = indexOf(index, tabId);
   if (hashes.length === 0) return [];
 
   const stored = await api.storage.session.get(hashes.map((hash) => itemKey(tabId, hash)));
@@ -196,7 +204,7 @@ export async function list(tabId: number): Promise<MediaItem[]> {
 export async function count(tabId: number): Promise<number> {
   await settle(tabId);
   const index = await api.storage.session.get(indexKey(tabId));
-  return ((index[indexKey(tabId)] as string[] | undefined) ?? []).length;
+  return indexOf(index, tabId).length;
 }
 
 /**
@@ -230,7 +238,7 @@ export function clear(tabId: number): Promise<void> {
     pending.items.clear();
     await pending.flushing;
     const index = await api.storage.session.get(indexKey(tabId));
-    const hashes = (index[indexKey(tabId)] as string[] | undefined) ?? [];
+    const hashes = indexOf(index, tabId);
     const keys = [
       indexKey(tabId),
       jobsKey(tabId),
@@ -249,7 +257,7 @@ const emptyJobs: TabJobs = { direct: [], streams: [] };
 
 export async function jobs(tabId: number): Promise<TabJobs> {
   const stored = await api.storage.session.get(jobsKey(tabId));
-  return (stored[jobsKey(tabId)] as TabJobs | undefined) ?? emptyJobs;
+  return read(stored, jobsKey(tabId), emptyJobs);
 }
 
 export function writeJobs(tabId: number, value: TabJobs): Promise<void> {

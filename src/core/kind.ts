@@ -115,6 +115,20 @@ const CONTENT_TYPES: readonly (readonly [string, MediaKind])[] = [
 
 const MANIFEST = /\.m3u8?$|\.mpd$|\.m4s$|\.cmf[av]$/i;
 
+const ANY_KIND = new RegExp(`\\.(?:${Object.keys(EXTENSIONS).join('|')})(?:$|[?#])`, 'i');
+
+/**
+ * Whether a path ends in a known media, document or font extension.
+ *
+ * Derived from EXTENSIONS so that adding an extension here adds it everywhere.
+ * The three detectors that carry this list separately drift apart within a
+ * release, and a detector that does not recognise a file type is a detector
+ * that silently misses it.
+ */
+export function hasKnownExtension(url: string): boolean {
+  return ANY_KIND.test(safePath(url) ?? url);
+}
+
 /** Extensions worth matching even without a dot separator, e.g. /path/x.mp4/. */
 export function extensionOf(url: string): string | null {
   const path = safePath(url);
@@ -134,7 +148,7 @@ function safePath(url: string): string | null {
   }
 }
 
-export function kindByExtension(url: string): MediaKind | null {
+function kindByExtension(url: string): MediaKind | null {
   const ext = extensionOf(url);
   return ext ? (EXTENSIONS[ext] ?? null) : null;
 }
@@ -165,10 +179,6 @@ export function isManifestUrl(url: string): boolean {
 export function isSegmentUrl(url: string): boolean {
   const ext = extensionOf(url);
   return ext === 'm4s' || ext === 'ts' || ext === 'cmfv' || ext === 'cmfa';
-}
-
-export function isDownloadable(kind: MediaKind | null): boolean {
-  return kind !== null;
 }
 
 /** Mime string to hand the download and preview layers, guessed from the URL. */

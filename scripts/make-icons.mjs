@@ -108,7 +108,7 @@ function encodePng(size, pixels) {
   ihdr.writeUInt32BE(size, 0);
   ihdr.writeUInt32BE(size, 4);
   ihdr[8] = 8; // bits per channel
-  ihdr[9] = 6; // colour type: RGBA
+  ihdr[9] = 6; // color type: RGBA
 
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),

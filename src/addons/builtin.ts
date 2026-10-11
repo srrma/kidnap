@@ -225,8 +225,8 @@ const ADOBE_FONT_URL =
  * Instagram.
  *
  * These read the shapes instagram.com serves today. `items[]`, which the
- * api/v1/feed/user endpoints return, appears on no surface captured here and
- * is not covered.
+ * api/v1/feed/user endpoints return, appears on no surface captured here and is
+ * not covered.
  *
  * What the site serves now puts a media object at the end of a path that
  * differs per surface and nowhere else. The field layout inside that object is
@@ -495,11 +495,11 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
      * `/v3/graphql` endpoint. A project arrives under one of two roots and
      * keeps the same fields either way, so only the path differs.
      *
-     * `covers.allAvailable` holds fourteen renditions per project, from the
-     * original down through 808, 404, 202, 230 and 115. The original is first
-     * in 48 of 48 projects captured, which is what makes indexing `[0]` right
-     * rather than lucky; a fixture pins it so a reshuffle fails a test instead
-     * of quietly downgrading every download to 115 pixels wide.
+     * `covers.allAvailable` holds every rendition of the cover, largest first,
+     * ending in a thumbnail around 115 pixels wide. Indexing `[0]` is what makes
+     * the original the cover rather than the thumbnail, so a fixture pins the
+     * order and a reshuffle fails a test instead of quietly downgrading every
+     * download.
      */
     rules: [
       { at: 'data.forYouFeed.nodes[].entity', media: BEHANCE_PROJECT },

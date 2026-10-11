@@ -85,25 +85,7 @@ export interface DirectJob {
   error?: string;
 }
 
-export type StreamStage =
-  | 'queued'
-  | 'probing'
-  | 'choosing'
-  | 'fetching'
-  | 'muxing'
-  | 'saving'
-  | 'done'
-  | 'failed'
-  | 'canceled';
-
-export interface StreamChoice {
-  label: string;
-  width?: number;
-  height?: number;
-  bitrate?: number;
-  /** Index into the choice list reported by the probe. */
-  index: number;
-}
+export type StreamStage = 'queued' | 'fetching' | 'done' | 'failed' | 'canceled';
 
 export interface StreamJob {
   id: string;
@@ -116,8 +98,6 @@ export interface StreamJob {
   progress: number;
   detail?: string;
   error?: string;
-  choices?: StreamChoice[];
-  chosen?: number;
 }
 
 export interface TabJobs {

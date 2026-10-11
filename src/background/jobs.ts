@@ -11,17 +11,10 @@
 import { on, post } from '../bus/protocol';
 import { buildFilename } from '../core/filename';
 import { jobId } from '../core/hash';
-import { classify } from '../core/kind';
-import type { DirectJob, MediaItem, Settings, StreamChoice, StreamJob } from '../core/types';
-import { fileNameOf } from '../core/url';
+import type { DirectJob, MediaItem, Settings, StreamJob } from '../core/types';
 import { api, supportsOffscreen } from '../platform';
 import { load } from '../store/settings';
 import * as store from '../store/tab';
-
-export interface JobContext {
-  getSettings: () => Settings;
-  post: typeof post;
-}
 
 let creatingOffscreen: Promise<void> | null = null;
 
@@ -34,7 +27,6 @@ let offscreenAnnounced = false;
 let waitingForOffscreen: Array<() => void> = [];
 
 on('offscreen:ready', () => {
-  console.log('[trace] offscreen announced ready');
   offscreenAnnounced = true;
   for (const wake of waitingForOffscreen) wake();
   waitingForOffscreen = [];
@@ -153,11 +145,7 @@ api.downloads.onChanged.addListener((delta) => {
 
 /* ── Streams ─────────────────────────────────────────────────────────────── */
 
-async function enqueueStream(
-  item: MediaItem,
-  settings: Settings,
-  choice?: number,
-): Promise<string> {
+async function enqueueStream(item: MediaItem, settings: Settings): Promise<string> {
   const tabId = item.tabId;
   const kind = item.url.includes('.mpd') ? 'dash' : 'hls';
   const job: StreamJob = {
@@ -166,12 +154,11 @@ async function enqueueStream(
     url: item.url,
     filename: buildFilename(item, settings.filenameTemplate, settings.folder, 1).replace(
       /\.[^.]+$/,
-      kind === 'dash' ? '.mp4' : '.mp4',
+      '.mp4',
     ),
     kind,
     state: 'queued',
     progress: 0,
-    chosen: choice,
   };
 
   const jobs = await store.jobs(tabId);
@@ -195,16 +182,6 @@ async function onAssembleProgress(
   detail?: string,
 ): Promise<void> {
   await updateStream(jobIdValue, { state: 'fetching', progress, detail });
-}
-
-async function onAssembleChoices(id: string, choices: StreamChoice[]): Promise<void> {
-  const job = await findStream(id);
-  if (!job) return;
-  if (choices.length <= 1) {
-    post('assemble:choose', { jobId: id, index: 0 });
-    return;
-  }
-  await updateStream(id, { state: 'choosing', choices });
 }
 
 async function onAssembleDone(id: string, blobUrl: string, filename: string): Promise<void> {
@@ -270,34 +247,23 @@ async function tabsWithJobs(): Promise<number[]> {
 
 /* ── Wiring ──────────────────────────────────────────────────────────────── */
 
-export function wireJobs(context: JobContext): void {
+export function wireJobs(): void {
   void (async () => {
     on('download:direct', async ({ items }) => {
       const settings = await load();
       return { queued: await enqueueDirect(items, settings) };
     });
 
-    on('download:stream', async ({ item, choice }) => {
+    on('download:stream', async ({ item }) => {
       const settings = await load();
-      return { jobId: await enqueueStream(item, settings, choice) };
-    });
-
-    /*
-     * A font saved as TTF is a short job rather than a queued one: the
-     * conversion is a repackaging that finishes in milliseconds, so it runs
-     * immediately and reports back when it is done. It runs in the offscreen
-     * document so closing the panel mid-conversion loses nothing.
-     */
-    on('stream:choose', async ({ jobId: streamId, index }) => {
-      post('assemble:choose', { jobId: streamId, index });
-      await updateStream(streamId, { chosen: index });
+      return { jobId: await enqueueStream(item, settings) };
     });
 
     on('job:cancel', async ({ id }) => {
       const job = await findStream(id);
       if (job) {
         await updateStream(id, { state: 'canceled' });
-        post('assemble:choose', { jobId: id, index: -1 });
+        post('assemble:cancel', { jobId: id });
         return;
       }
       for (const tabId of await tabsWithJobs()) {
@@ -314,22 +280,11 @@ export function wireJobs(context: JobContext): void {
     on('assemble:progress', (payload) =>
       onAssembleProgress(payload.jobId, payload.progress, payload.detail),
     );
-    on('assemble:choices', (payload) => onAssembleChoices(payload.jobId, payload.choices));
     on('assemble:done', (payload) =>
       onAssembleDone(payload.jobId, payload.blobUrl, payload.filename),
     );
     on('assemble:failed', (payload) => onAssembleFailed(payload.jobId, payload.error));
-
-    void context;
   })();
-}
-
-/** Falls back to a name derived from the URL when a job has none. */
-export function streamFilename(item: MediaItem, settings: Settings): string {
-  const base = buildFilename(item, settings.filenameTemplate, settings.folder, 1);
-  return classify(item.url) === 'stream' && base.endsWith('.bin')
-    ? `${base.slice(0, -4)}.mp4`
-    : (fileNameOf(item.url) ?? base);
 }
 
 function describeError(error: unknown): string {

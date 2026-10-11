@@ -2,7 +2,7 @@
  * Passive network observation.
  *
  * The listener only observes. It never blocks, never rewrites and never
- * returns a blocking response, so nothing on the page changes behaviour
+ * returns a blocking response, so nothing on the page changes behavior
  * because Kidnap is installed. Response headers are requested with
  * extraHeaders so the content type is the real one rather than the
  * CORS-filtered version.
@@ -11,6 +11,7 @@
  * to read values that DNR deliberately keeps out of the extension's reach.
  */
 
+import { hasKnownExtension } from '../core/kind';
 import type { Settings } from '../core/types';
 import { fileNameFromDisposition, headerValue, parseIntOr } from '../core/url';
 import { isMuted, type Report } from './ingest';
@@ -35,8 +36,6 @@ const PROTECTED_TYPES = [
   'application/vnd.apple.mpegurl+cenc',
 ];
 
-const DRM_URL = /(?:widevine|playready|clearkey|fairplay|\/drm\/|\.wvm\b|\bcenc\b|license)/i;
-
 export function inspect(
   details: chrome.webRequest.OnHeadersReceivedDetails,
   settings: Settings,
@@ -57,7 +56,7 @@ export function inspect(
   }
 
   const interesting = INTERESTING.some((prefix) => type.startsWith(prefix));
-  if (!interesting && !looksLikeMediaPath(details.url)) return null;
+  if (!interesting && !hasKnownExtension(details.url)) return null;
 
   const disposition = headerValue(details.responseHeaders, 'content-disposition');
 
@@ -77,12 +76,6 @@ export function inspect(
  * JSON is deliberately absent: every site fetches configuration for itself,
  * and listing settings.json beside the actual media is worse than missing it.
  */
-function looksLikeMediaPath(url: string): boolean {
-  return /\.(?:jpe?g|png|gif|webp|avif|svg|bmp|ico|mp4|m4v|webm|mov|mkv|avi|mp3|m4a|aac|ogg|oga|opus|wav|flac|m3u8|mpd|pdf|epub|csv)(?:$|[?#])/i.test(
-    url,
-  );
-}
-
 function fileNameOfPath(url: string): string | undefined {
   try {
     const name = new URL(url).pathname.split('/').pop();
@@ -90,9 +83,4 @@ function fileNameOfPath(url: string): string | undefined {
   } catch {
     return undefined;
   }
-}
-
-/** True when a URL is a DRM license or key endpoint rather than media. */
-export function isProtectedUrl(url: string): boolean {
-  return DRM_URL.test(url);
 }

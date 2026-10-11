@@ -9,15 +9,14 @@ for (const target of ['chromium', 'firefox']) {
   const build = spawnSync('node', ['scripts/build.mjs', `--target=${target}`], {
     cwd: root,
     stdio: 'inherit',
+    env: { ...process.env, KIDNAP_RELEASE: '1' },
   });
   if (build.status !== 0) process.exit(build.status ?? 1);
 
   const { version } = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
-  const ext = target === 'firefox' ? 'zip' : 'zip';
   mkdirSync(resolve(root, 'artifacts'), { recursive: true });
-  const out = resolve(root, 'artifacts', `kidnap-${version}-${target}.${ext}`);
+  const out = resolve(root, 'artifacts', `kidnap-${version}-${target}.zip`);
 
-  /* `zip` is the format both stores accept for an unsigned upload. */
   const zipped = spawnSync('zip', ['-qr', out, '.'], { cwd: resolve(root, 'dist') });
   if (zipped.status !== 0) {
     console.error('zip failed. Install the zip command, or archive dist/ by hand.');
