@@ -67,6 +67,35 @@ const SITES = {
     userProbe: (node) => node?.core?.user_results?.result ?? null,
   },
 
+  facebook: {
+    id: 'facebook',
+    label: 'Facebook',
+    base: 'https://www.facebook.com',
+    cookies: 'Downloads/www.facebook.com_cookies.txt',
+    matches: (url) => /\/api\/graphql|\/ajax\/|\/video\/unified|\/api\/v/.test(url),
+    mediaKeys: [
+      'playable_url',
+      'browser_native_hd_url',
+      'playable_url_quality_hd',
+      'photo_image',
+    ],
+    surfaces: [
+      { name: 'feed', url: '/', scroll: 8 },
+      { name: 'explore', url: '/explore', scroll: 4 },
+      { name: 'watch', url: '/watch', scroll: 3 },
+      { name: 'marketplace', url: '/marketplace', scroll: 4 },
+      { name: 'groups', url: '/groups', scroll: 3 },
+    ],
+    discover: {
+      post: {
+        from: 'feed',
+        selector: 'a[href*="/watch"], a[href*="/videos/"], a[href*="/photo"]',
+        strip: /\?.*$/,
+      },
+    },
+    userProbe: (node) => node?.actor ?? node?.from ?? node?.owner ?? null,
+  },
+
   instagram: {
     id: 'instagram',
     label: 'Instagram',
@@ -141,6 +170,32 @@ function mediaPaths(node, keys, path = '', depth = 0, found = []) {
 }
 
 const rootsOf = (body) => Object.keys(body?.data ?? body ?? {}).slice(0, 12);
+
+/**
+ * Paths to values that look like a media URL.
+ *
+ * Key names are a guess until seen, but a URL on a CDN with a media extension
+ * is not. This finds the placeholders in a response nobody has documented yet,
+ * which is what it was needed for on Facebook.
+ */
+const MEDIA_URL = /\.(jpe?g|png|webp|gif|mp4|m4v|mov|webm)(\?|$)/i;
+
+function urlPaths(node, path = '', depth = 0, found = []) {
+  if (depth > 26 || found.length > 300 || !node || typeof node !== 'object') return found;
+  if (Array.isArray(node)) {
+    for (const value of node.slice(0, 4)) urlPaths(value, `${path}[]`, depth + 1, found);
+    return found;
+  }
+  for (const [key, value] of Object.entries(node)) {
+    const next = path ? `${path}.${key}` : key;
+    if (typeof value === 'string' && MEDIA_URL.test(value)) {
+      found.push(`${next}  =  ${value.slice(0, 64)}`);
+      continue;
+    }
+    urlPaths(value, next, depth + 1, found);
+  }
+  return found;
+}
 
 /**
  * Reports how the user object is shaped, because a site has changed one of
@@ -273,6 +328,7 @@ async function run(site) {
       roots: new Set(),
       users: new Set(),
       media: new Set(),
+      urls: new Set(),
       bytes: 0,
       calls: 0,
     };
@@ -280,6 +336,7 @@ async function run(site) {
     entry.roots.add(rootsOf(body).join('.'));
     for (const u of userShape(body, site.userProbe)) entry.users.add(u);
     for (const p of paths) entry.media.add(p);
+    for (const p of urlPaths(body)) entry.urls.add(p);
     entry.bytes = Math.max(entry.bytes, JSON.stringify(body).length);
     entry.calls += 1;
     responses.set(name, entry);
@@ -370,16 +427,18 @@ async function run(site) {
       roots: [...e.roots].sort(),
       userObject: [...e.users].sort(),
       media: [...e.media].sort(),
+      urls: [...e.urls].sort(),
     }))
     .sort((a, b) => a.endpoint.localeCompare(b.endpoint));
 
-  const withMedia = report.filter((r) => r.media.length > 0);
+  const withMedia = report.filter((r) => r.media.length > 0 || r.urls.length > 0);
   console.log(`\n${site.label}: ${report.length} endpoints, ${withMedia.length} carry media\n`);
   for (const entry of withMedia) {
     console.log(`## ${entry.endpoint}  (${entry.seenOn.join(', ')})`);
     console.log(`   roots: ${entry.roots.join(' | ')}`);
     for (const u of entry.userObject) console.log(`   user object keys: ${u}`);
     for (const p of entry.media) console.log(`   ${p}`);
+    for (const p of entry.urls.slice(0, 24)) console.log(`   ? ${p}`);
     console.log('');
   }
   if (withMedia.length === 0) {

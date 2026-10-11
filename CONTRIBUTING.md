@@ -51,6 +51,16 @@ If you touch `src/store/tab.ts`, keep the concurrent tests. That file is the
 most concurrency-sensitive in the repository, and the tests that prove two
 detectors cannot lose each other's writes are the ones that matter.
 
+## Fixtures
+
+A fixture must be cut from a response the site actually sent, not written to
+match a rule. A rule tested against a fixture built to agree with it proves
+nothing, which is how X, Instagram and their tests all passed while extracting
+nothing from the live site.
+
+`node scripts/coverage.mjs` prints which fixtures are captured and which are
+hand-written. When adding a platform, the fixture has to be a capture.
+
 ## Commits
 
 Conventional Commits: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`.

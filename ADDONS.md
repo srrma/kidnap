@@ -245,6 +245,10 @@ session.
 Instagram is in the same position, and for the same reason:
 [Instagram responses](docs/instagram-responses.md).
 
+[Facebook responses](docs/facebook-responses.md) records what was captured and
+what was not: the feed handed over no media at all, so no rule there has been
+run against a real response yet.
+
 ## What add-ons cannot do
 
 - Cannot execute code, by construction.
