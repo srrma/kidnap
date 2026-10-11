@@ -20,7 +20,10 @@ node scripts/capture.mjs --site=x --surfaces=home,search-live
 node scripts/capture.mjs --site=x --url=/someone/status/123
 ```
 
-The same tool covers [Instagram](instagram-responses.md) with `--site=instagram`.
+The same tool covers [Instagram](instagram-responses.md), [Facebook](facebook-responses.md),
+[Reddit](reddit-responses.md), Bluesky, Imgur, Twitch and TikTok with `--site=`.
+Cookies are optional: Bluesky, Imgur and Twitch serve media to a browser with
+no account, and a signed-out session is a perfectly good thing to map.
 
 The script browses as the signed-in user, visits ten surfaces, and reports every
 `/i/api/` response: its roots, where media appears in it, and whether the user

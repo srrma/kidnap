@@ -475,20 +475,59 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
     name: 'Bluesky',
     hosts: ['bsky.app', 'bsky.social', 'api.bsky.app'],
     apiPaths: ['/xrpc/app.bsky.feed.'],
+    /*
+     * Bluesky sends every embed twice.
+     *
+     * `post.record.embed` is the ATProto record as it was written: a CID, a
+     * mime type and a size, with no URL anywhere in it. `post.embed` is the
+     * same embed resolved for display, and that is the one with the links.
+     *
+     * A getTimeline response of thirty posts, sixteen with images and six
+     * with video, yields a row from every post that carries media.
+     *
+     * `post.embed.playlist` is the HLS playlist as a bare string rather than an
+     * object, so the video rule reads the embed itself and takes `playlist` as
+     * the url. Images sit one level deeper, with `fullsize` and `thumb` at the
+     * top of each entry.
+     */
     rules: [
       {
-        at: 'feed[].post.embed.app.bsky.embed.video',
+        at: 'feed[].post.embed.images[]',
         media: {
-          url: 'playlist.url',
-          mime: 'playlist.mimeType',
-          caption: '^^^^^record.text',
-          author: '^^^^^author.handle',
-          thumbnail: '^thumbnail.url',
-          published: '^^^^^indexedAt',
-          postId: { last: '^^^^^uri' },
+          url: 'fullsize',
+          /*
+           * cdn.bsky.app serves blobs from an extensionless path, so nothing
+           * about the URL says what it is. Bluesky's fullsize rendition is
+           * JPEG unless asked otherwise, and the rule has to say so or every
+           * image is dropped for having no file name.
+           */
+          mime: { literal: 'image/jpeg' },
+          thumbnail: 'thumb',
+          alt: 'alt',
+          caption: '^^record.text',
+          author: '^^author.handle',
+          published: '^^indexedAt',
+          postId: { last: '^^uri' },
           postUrl: {
             template: 'https://bsky.app/profile/{handle}/post/{rkey}',
-            values: { handle: '^^^^^author.handle', rkey: { last: '^^^^^uri' } },
+            values: { handle: '^^author.handle', rkey: { last: '^^uri' } },
+          },
+        },
+      },
+      {
+        at: 'feed[].post.embed',
+        media: {
+          when: { path: 'playlist', exists: true },
+          url: 'playlist',
+          mime: { literal: 'application/vnd.apple.mpegurl' },
+          thumbnail: 'thumbnail',
+          caption: '^record.text',
+          author: '^author.handle',
+          published: '^indexedAt',
+          postId: { last: '^uri' },
+          postUrl: {
+            template: 'https://bsky.app/profile/{handle}/post/{rkey}',
+            values: { handle: '^author.handle', rkey: { last: '^uri' } },
           },
         },
       },

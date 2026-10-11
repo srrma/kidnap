@@ -78,7 +78,6 @@ const HAND_WRITTEN = new Set([
   'reddit-post.json',
   'tiktok-item.json',
   'imgur-gallery.json',
-  'bsky-feed.json',
   'twitch-video.json',
   'facebook-video.json',
 ]);

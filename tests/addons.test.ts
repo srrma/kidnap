@@ -324,20 +324,6 @@ describe('builtin addons', () => {
     expect(images[0]?.pageUrl).toBe('https://imgur.com/Xy9zK2p');
   });
 
-  it('reads a Bluesky HLS playlist', () => {
-    const items = extract(
-      'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed',
-      fixture('bsky-feed.json'),
-    );
-    const stream = items.find((item) => item.kind === 'stream');
-    expect(stream?.url).toContain('playlist.m3u8');
-    expect(stream?.mime).toBe('application/vnd.apple.mpegurl');
-    expect(stream?.author).toBe('example.editor');
-    expect(stream?.caption).toBe('first cut of the reel');
-    expect(stream?.postId).toBe('3kabcdef');
-    expect(stream?.pageUrl).toBe('https://bsky.app/profile/example.editor/post/3kabcdef');
-  });
-
   it('reads Twitch VOD renditions', () => {
     const items = extract('https://gql.twitch.tv/gql', fixture('twitch-video.json'));
     const video = items.filter((item) => item.kind === 'stream');

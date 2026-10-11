@@ -19,7 +19,7 @@
  * is deliberate, so the fixtures stay small and the ones that exist stay true.
  */
 
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,6 +65,85 @@ const SITES = {
     },
     /* Where to look for the user object, for reporting how it is shaped. */
     userProbe: (node) => node?.core?.user_results?.result ?? null,
+  },
+
+  bsky: {
+    id: 'bsky',
+    label: 'Bluesky',
+    base: 'https://bsky.app',
+    /* Public API, no account needed. */
+    cookies: null,
+    matches: (url) => /xrpc\/|api\.bsky\.app/.test(url),
+    mediaKeys: ['blob', 'video', 'fullsize', 'images', 'aspectRatio', 'playlist'],
+    surfaces: [
+      { name: 'discover', url: '/', scroll: 6 },
+      { name: 'profile', url: '/profile/bsky.app', scroll: 4 },
+    ],
+    discover: {
+      post: {
+        from: 'discover',
+        selector: 'a[href*="/profile/"][href*="/post/"]',
+        strip: /\?.*$/,
+      },
+    },
+    userProbe: (node) => node?.author ?? null,
+  },
+
+  imgur: {
+    id: 'imgur',
+    label: 'Imgur',
+    base: 'https://imgur.com',
+    cookies: null,
+    matches: (url) => /\/api\/|\/gallery\/|imgur\.com\/(rest|gallery)/.test(url),
+    mediaKeys: ['media', 'images', 'type', 'mp4', 'gifv', 'video'],
+    surfaces: [{ name: 'home', url: '/', scroll: 5 }],
+    discover: {
+      gallery: {
+        from: 'home',
+        selector: 'a[href*="/gallery/"], a[href*="/a/"]',
+        strip: /\?.*$/,
+      },
+    },
+    userProbe: (node) => node?.account ?? node?.account_url ?? null,
+  },
+
+  twitch: {
+    id: 'twitch',
+    label: 'Twitch',
+    base: 'https://www.twitch.tv',
+    cookies: null,
+    matches: (url) => /gql\.twitch\.tv|\/api\/helix\/videos/.test(url),
+    mediaKeys: ['videoQualities', 'playableUrl', 'animatedPreviewURL', 'thumbnailUrl'],
+    surfaces: [
+      { name: 'directory', url: '/videos', scroll: 6 },
+      { name: 'video', url: '/videos/106400740', scroll: 2 },
+    ],
+    discover: {
+      video: {
+        from: 'directory',
+        selector: 'a[href*="/videos/"]',
+        strip: /\?.*$/,
+        keep: /^\/videos\/[0-9]{6,}$/,
+      },
+    },
+    userProbe: (node) => node?.owner ?? null,
+  },
+
+  tiktok: {
+    id: 'tiktok',
+    label: 'TikTok',
+    base: 'https://www.tiktok.com',
+    cookies: null,
+    matches: (url) => /\/api\/|\/web\/api\//.test(url),
+    mediaKeys: ['playAddr', 'downloadAddr', 'cover', 'originCover', 'images', 'video'],
+    surfaces: [
+      { name: 'explore', url: '/explore', scroll: 6 },
+      { name: 'discover', url: '/discover', scroll: 4 },
+    ],
+    discover: {
+      post: { from: 'explore', selector: 'a[href*="/video/"]', strip: /\?.*$/ },
+    },
+    userProbe: (node) => node?.author ?? null,
   },
 
   reddit: {
@@ -251,7 +330,16 @@ function userShape(body, probe) {
   return [...hits];
 }
 
+/**
+ * Reads a Netscape cookie file, if there is one.
+ *
+ * Cookies are optional. Bluesky, Imgur and Twitch all serve media to a browser
+ * with no account at all, and a signed-out session is a perfectly good thing
+ * to map: it is what most people actually use. Only sites that withhold media
+ * from anonymous visitors need one.
+ */
 function readCookies(file) {
+  if (!existsSync(file)) return [];
   const cookies = [];
   for (const line of readFileSync(file, 'utf8').split('\n')) {
     if (!line.trim() || line.startsWith('#')) continue;
@@ -272,7 +360,8 @@ function readCookies(file) {
 }
 
 async function run(site) {
-  const cookieFile = process.env.COOKIES ?? resolve(process.env.HOME, site.cookies);
+  const cookieFile =
+    process.env.COOKIES ?? (site.cookies ? resolve(process.env.HOME, site.cookies) : null);
   const ctx = await chromium.launchPersistentContext(
     mkdtempSync(join(tmpdir(), 'kidnap-capture-')),
     {
@@ -291,7 +380,11 @@ async function run(site) {
 
   const responses = new Map();
   const page = await ctx.newPage();
-  await ctx.addCookies(readCookies(cookieFile));
+  const cookies = cookieFile ? readCookies(cookieFile) : [];
+  if (cookies.length > 0) await ctx.addCookies(cookies);
+  console.error(
+    `> cookies: ${cookies.length ? cookies.length + ' from ' + cookieFile : 'none, browsing signed out'}`,
+  );
 
   let current = 'startup';
 
