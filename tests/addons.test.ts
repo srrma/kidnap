@@ -324,24 +324,6 @@ describe('builtin addons', () => {
     expect(images[0]?.pageUrl).toBe('https://imgur.com/Xy9zK2p');
   });
 
-  it('reads Twitch VOD renditions', () => {
-    const items = extract('https://gql.twitch.tv/gql', fixture('twitch-video.json'));
-    const video = items.filter((item) => item.kind === 'stream');
-    expect(video).toHaveLength(4);
-
-    const best = video[0];
-    expect(best?.label).toBe('1080p60');
-    expect(best?.caption).toBe('full match replay');
-    expect(best?.author).toBe('example_channel');
-    expect(best?.pageUrl).toBe('https://www.twitch.tv/videos/1234567890');
-    expect(best?.duration).toBe(5430);
-    expect(best?.published).toBe(new Date(1686751200 * 1000).toISOString());
-    expect(best?.thumbnail).toContain('jtvnw.net');
-
-    /* Every rendition belongs to one video, so they collapse to one row. */
-    expect(new Set(video.map((item) => item.groupId)).size).toBe(1);
-  });
-
   it('reads Facebook HD and SD separately', () => {
     const items = extract(
       'https://www.facebook.com/api/graphql/',
@@ -553,7 +535,6 @@ describe('validation', () => {
       'tiktok',
       'imgur',
       'bsky',
-      'twitch',
       'facebook',
       'adobe-fonts',
       'adobe-fonts-collections',

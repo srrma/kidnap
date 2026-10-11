@@ -624,34 +624,6 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   },
 
   {
-    id: 'twitch',
-    name: 'Twitch',
-    hosts: ['gql.twitch.tv'],
-    apiPaths: ['/gql'],
-    rules: [
-      {
-        at: 'data.video.videoQualities[]',
-        media: {
-          // Twitch declares no mime, so the rule asserts it. The VOD endpoints
-          // all serve a playlist whatever the "quality" says.
-          mime: { literal: 'application/vnd.apple.mpegurl' },
-          url: 'sourceURL',
-          label: 'quality',
-          group: '^id',
-          thumbnail: '^thumbnailURL',
-          caption: '^title',
-          author: '^owner.login',
-          duration: '^lengthSeconds',
-          published: '^createdAtSeconds',
-          postId: '^id',
-          postUrl: { template: 'https://www.twitch.tv/videos/{id}', values: { id: '^id' } },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-    ],
-  },
-
-  {
     id: 'facebook',
     name: 'Facebook',
     hosts: ['facebook.com', 'fbcdn.net'],

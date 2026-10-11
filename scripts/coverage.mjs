@@ -56,12 +56,6 @@ const FIXTURES = {
     'https://www.instagram.com/discover/web/explore_grid/',
   ],
   'bsky-feed.json': ['bsky', 'https://public.api.bsky.app/xrpc/app.bsky.feed.getTimeline'],
-  /*
-   * The GraphQL host, which is what the add-on claims. Running the same fixture
-   * under api.twitch.tv reports zero and looks like a broken add-on, which is
-   * the mistake this file exists to stop making.
-   */
-  'twitch-video.json': ['twitch', 'https://gql.twitch.tv/gql'],
   'facebook-video.json': ['facebook', 'https://www.facebook.com/video/unified_cvc/'],
   'pinterest-home.json': [
     'pinterest',
@@ -88,7 +82,6 @@ const HAND_WRITTEN = new Set([
   'reddit-post.json',
   'tiktok-item.json',
   'imgur-gallery.json',
-  'twitch-video.json',
   'facebook-video.json',
 ]);
 
