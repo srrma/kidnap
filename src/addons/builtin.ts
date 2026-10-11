@@ -221,6 +221,137 @@ const xRules: RuleSpec[] = [
 const ADOBE_FONT_URL =
   'https://use.typekit.net/pf/tk/{kit}/{fvd}/l?unicode=AAAAAQAAAAEAAAAB&features=ALL&v=3&ec_token=3bb2a6e53c9684ffdc9a9bf71d5b2a620e68abb153386c46ebe547292f11a96176a59ec4f0c7aacfef2663c08018dc100eedf850c284fb72392ba910777487b32ba21c08cc8c33d00bda49e7e2cc90baff01835518dde43e2e8d5ebf7b76545fc2687ab10bc2b0911a141f3cf7f04f3cac438a135f';
 
+/*
+ * Instagram.
+ *
+ * These read the shapes instagram.com serves today. `items[]`, which the
+ * api/v1/feed/user endpoints return, appears on no surface captured here and
+ * is not covered.
+ *
+ * What the site serves now puts a media object at the end of a path that
+ * differs per surface and nowhere else. The field layout inside that object is
+ * the same every time, so one set of media specs covers all of them:
+ *
+ *   image        image_versions2.candidates[]   each with url, width, height
+ *   video        video_versions[]                each with url, width, height
+ *   carousel     carousel_media[]                media objects, all over again
+ *
+ * media_type is 1 for an image, 2 for a video and 8 for a carousel. A video
+ * also carries a poster in image_versions2, so without a guard every video
+ * arrives with its own thumbnail as a second download.
+ *
+ * A carousel child repeats the whole structure one level down, which moves the
+ * post another level away. The caret counts differ between the two sets for
+ * that reason, and mixing them up is the mistake that reads as "the rules look
+ * right".
+ */
+/*
+ * Depth is the whole difficulty here. For a media object at P:
+ *
+ *   …media.image_versions2.candidates[]   candidate   ^^ is P
+ *   …media.video_versions[]               version     ^  is P
+ *   …media.carousel_media[].image_versions2.candidates[]
+ *                                         candidate   ^^ is the child, ^^^ is P
+ *   …media.carousel_media[].video_versions[]
+ *                                         version     ^  is the child, ^^ is P
+ */
+const igImage: MediaSpec = {
+  url: 'url',
+  width: 'width',
+  height: 'height',
+  group: '^^id',
+  /* A poster must not be offered again as the image it belongs to. */
+  when: { path: '^^video_versions', absent: true },
+  caption: '^^caption.text',
+  author: '^^user.username',
+  published: '^^taken_at',
+  postId: '^^pk',
+  postUrl: { template: 'https://www.instagram.com/p/{code}/', values: { code: '^^code' } },
+  timeFormat: 'epoch-seconds',
+};
+
+const igVideo: MediaSpec = {
+  url: 'url',
+  width: 'width',
+  height: 'height',
+  bitrate: 'bandwidth',
+  group: '^id',
+  thumbnail: '^image_versions2.candidates[0].url',
+  duration: '^video_duration',
+  caption: '^caption.text',
+  author: '^user.username',
+  published: '^taken_at',
+  postId: '^pk',
+  postUrl: { template: 'https://www.instagram.com/p/{code}/', values: { code: '^code' } },
+  timeFormat: 'epoch-seconds',
+};
+
+const igChildImage: MediaSpec = {
+  url: 'url',
+  width: 'width',
+  height: 'height',
+  group: '^^id',
+  when: { path: '^^video_versions', absent: true },
+  caption: '^^^caption.text',
+  author: '^^^user.username',
+  published: '^^^taken_at',
+  postId: '^^^pk',
+  postUrl: { template: 'https://www.instagram.com/p/{code}/', values: { code: '^^^code' } },
+  timeFormat: 'epoch-seconds',
+};
+
+/*
+ * One level shallower than the child image, and not by mistake: writing
+ * `video_versions[]` as a single segment means the fan replaces that segment
+ * rather than sitting inside it, while `image_versions2.candidates[]` keeps
+ * image_versions2 as a step of its own. The same caret therefore reaches a
+ * different object in each, which is the easiest thing in this file to get
+ * wrong and impossible to spot without a test.
+ */
+const igChildVideo: MediaSpec = {
+  url: 'url',
+  width: 'width',
+  height: 'height',
+  bitrate: 'bandwidth',
+  group: '^id',
+  thumbnail: '^image_versions2.candidates[0].url',
+  duration: '^^video_duration',
+  caption: '^^caption.text',
+  author: '^^user.username',
+  published: '^^taken_at',
+  postId: '^^pk',
+  postUrl: { template: 'https://www.instagram.com/p/{code}/', values: { code: '^^code' } },
+  timeFormat: 'epoch-seconds',
+};
+
+/**
+ * Every path that has been seen to end at a media object, captured rather than
+ * assumed. Each is one entry point on the site; the object at the end of them
+ * all is the same shape.
+ */
+const IG_MEDIA_PATHS = [
+  /* The signed-in home feed. */
+  'data.xdt_api__v1__feed__timeline__connection.edges[].node.media',
+  'data.xdt_api__v1__feed__timeline__connection.edges[].node.explore_story.media',
+  /* A profile's posts. Same connection, different name. */
+  'data.xdt_api__v1__feed__user_timeline_graphql_connection.edges[].node.media',
+  /* Explore, which is not a connection at all. */
+  'sectional_items[].layout_content.medias[].media',
+  'sectional_items[].layout_content.medias[].clips.items[].media',
+  /* Reels, served through a separate fetch. */
+  'data.fetch__XDTUserDict.clips_connection.edges[].node.media',
+  /* Promoted posts and story units carry media too. */
+  'data.xdt_api__v1__feed__timeline__connection.edges[].node.ad.items[]',
+  'data.xdt_injected_story_units.ad_media_items[].items[]',
+];
+
+const instagramRules: RuleSpec[] = IG_MEDIA_PATHS.flatMap((path) => [
+  { at: `${path}.video_versions[]`, media: igVideo },
+  { at: `${path}.image_versions2.candidates[]`, media: igImage },
+  { at: `${path}.carousel_media[].video_versions[]`, media: igChildVideo },
+  { at: `${path}.carousel_media[].image_versions2.candidates[]`, media: igChildImage },
+]);
+
 export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   {
     id: 'x',
@@ -268,47 +399,8 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
     id: 'instagram',
     name: 'Instagram',
     hosts: ['instagram.com', 'threads.net'],
-    apiPaths: ['/api/', '/graphql'],
-    rules: [
-      {
-        at: 'items[].video_versions[]',
-        media: {
-          url: 'url',
-          width: 'width',
-          height: 'height',
-          group: '^id',
-          caption: '^caption.text',
-          author: '^user.username',
-          thumbnail: '^image_versions2.candidates[0].url',
-          published: '^taken_at',
-          duration: '^video_duration',
-          postId: '^id',
-          postUrl: {
-            template: 'https://www.instagram.com/p/{code}/',
-            values: { code: '^code' },
-          },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-      {
-        at: 'items[].image_versions2.candidates[]',
-        media: {
-          url: 'url',
-          width: 'width',
-          height: 'height',
-          group: '^id',
-          caption: '^caption.text',
-          author: '^user.username',
-          published: '^taken_at',
-          postId: '^id',
-          postUrl: {
-            template: 'https://www.instagram.com/p/{code}/',
-            values: { code: '^code' },
-          },
-          timeFormat: 'epoch-seconds',
-        },
-      },
-    ],
+    apiPaths: ['/api/', '/graphql', '/discover/'],
+    rules: instagramRules,
   },
 
   {

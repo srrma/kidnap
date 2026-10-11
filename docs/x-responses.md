@@ -14,11 +14,13 @@ else says so plainly.
 Regenerate the whole thing with:
 
 ```bash
-SAVE=1 node scripts/capture-x.mjs                 # browse, then write the report
-BODIES=/tmp/x node scripts/capture-x.mjs          # keep the payloads too
-node scripts/capture-x.mjs --surfaces=home,search-live
-node scripts/capture-x.mjs --url=/someone/status/123
+SAVE=1 node scripts/capture.mjs --site=x         # browse, then write the report
+BODIES=/tmp/x node scripts/capture.mjs --site=x   # keep the payloads too
+node scripts/capture.mjs --site=x --surfaces=home,search-live
+node scripts/capture.mjs --site=x --url=/someone/status/123
 ```
+
+The same tool covers [Instagram](instagram-responses.md) with `--site=instagram`.
 
 The script browses as the signed-in user, visits ten surfaces, and reports every
 `/i/api/` response: its roots, where media appears in it, and whether the user

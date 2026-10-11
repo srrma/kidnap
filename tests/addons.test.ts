@@ -297,23 +297,6 @@ describe('builtin addons', () => {
     expect(video?.postId).toBe('abc123');
   });
 
-  it('reads Instagram video versions and the cover image', () => {
-    const items = extract(
-      'https://www.instagram.com/api/v1/media/1/info/',
-      fixture('instagram-media.json'),
-    );
-    const videos = items.filter((item) => item.kind === 'video');
-    expect(videos).toHaveLength(2);
-    expect(videos.every((item) => item.caption === 'morning run')).toBe(true);
-    expect(videos.every((item) => item.author === 'example.runner')).toBe(true);
-    expect(videos[0]?.pageUrl).toBe('https://www.instagram.com/p/ABC123xyz/');
-    expect(videos[0]?.duration).toBeCloseTo(14.5, 2);
-    expect(new Set(videos.map((item) => item.groupId)).size).toBe(1);
-
-    const image = items.find((item) => item.kind === 'image');
-    expect(image?.width).toBe(640);
-  });
-
   it('reads a TikTok video', () => {
     const items = extract(
       'https://www.tiktok.com/api/post/item_list/',
@@ -714,5 +697,82 @@ describe('adobe fonts', () => {
     expect(
       registry.extractText('https://fonts.adobe.com/fonts/roboto', '<html>nope</html>', 1),
     ).toHaveLength(0);
+  });
+});
+
+describe('instagram', () => {
+  /*
+   * The rules used to read `items[]`, which is what the old api/v1/feed/user
+   * endpoints return. Nothing on instagram.com serves that now: measured
+   * against real bodies the old rules extracted zero rows, from the feed and
+   * from explore alike, while passing every test that had been written for
+   * them. These fixtures are cut from captured responses so that cannot
+   * happen again.
+   */
+  const CASES: Array<[string, string, string]> = [
+    ['feed', 'instagram-feed.json', 'https://www.instagram.com/graphql/query'],
+    [
+      'explore',
+      'instagram-explore.json',
+      'https://www.instagram.com/discover/web/explore_grid/',
+    ],
+  ];
+
+  for (const [name, file, url] of CASES) {
+    it(`reads media from the ${name}, as the site serves it`, () => {
+      const items = extract(url, fixture(file));
+      expect(items.length).toBeGreaterThan(0);
+
+      for (const item of items) {
+        expect(item.detector).toBe('addon');
+        expect(item.author, `no author on ${item.url}`).toBe('sample user');
+        expect(item.caption).toBeTruthy();
+        expect(item.pageUrl).toMatch(/^https:\/\/www\.instagram\.com\/p\/SAMPLECODE/);
+        expect(item.width).toBeGreaterThan(0);
+        expect(item.height).toBeGreaterThan(0);
+      }
+    });
+  }
+
+  it('reads a carousel, whose children carry no author of their own', () => {
+    const items = extract(
+      'https://www.instagram.com/graphql/query',
+      fixture('instagram-feed.json'),
+    );
+    /*
+     * media_type 8 is a carousel. Its children repeat the whole structure one
+     * level down, and read the post's author from the parent, which is what
+     * the extra carets in the child specs are for.
+     */
+    const body = fixture('instagram-feed.json') as {
+      data: {
+        xdt_api__v1__feed__timeline__connection: {
+          edges: Array<{ node: { media: { carousel_media?: unknown[] } } }>;
+        };
+      };
+    };
+    const carousels = body.data.xdt_api__v1__feed__timeline__connection.edges.filter(
+      (edge) => (edge.node.media.carousel_media ?? []).length > 0,
+    );
+    expect(carousels.length).toBeGreaterThan(0);
+    for (const item of items) expect(item.author).toBe('sample user');
+  });
+
+  it('does not offer a video poster as a second image', () => {
+    const items = extract(
+      'https://www.instagram.com/discover/web/explore_grid/',
+      fixture('instagram-explore.json'),
+    );
+    const videos = items.filter((item) => item.kind === 'video');
+    expect(videos.length).toBeGreaterThan(0);
+
+    /* A video's poster URL is kept as its thumbnail, and offered once. */
+    for (const video of videos) {
+      expect(video.thumbnail).toBeTruthy();
+      const asImage = items.filter(
+        (item) => item.kind === 'image' && item.url === video.thumbnail,
+      );
+      expect(asImage).toHaveLength(0);
+    }
   });
 });

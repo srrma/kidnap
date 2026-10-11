@@ -239,7 +239,11 @@ The add-on language rules for X are easy to get subtly wrong, because the same
 data arrives in several shapes depending on which surface you are on. The
 endpoints, the paths and the traps are written down in
 [X responses](docs/x-responses.md), and
-`node scripts/capture-x.mjs` regenerates that record from a live session.
+`node scripts/capture.mjs --site=x` regenerates that record from a live
+session.
+
+Instagram is in the same position, and for the same reason:
+[Instagram responses](docs/instagram-responses.md).
 
 ## What add-ons cannot do
 
