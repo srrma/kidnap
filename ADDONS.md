@@ -1,5 +1,10 @@
 # Add-ons
 
+> **Writing a new one?** Start with
+> [`skills/kidnap-addon/SKILL.md`](skills/kidnap-addon/SKILL.md) rather than
+> here. This file is the format; that one is the method, and it exists because
+> four add-ons passed their tests while matching nothing at all.
+
 An add-on tells Kidnap where a site's API keeps its media. It is JSON, and that
 is the whole point: an add-on cannot call a function, cannot open its own
 connections, and cannot touch the page. You can paste one from anywhere and the

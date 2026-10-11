@@ -51,6 +51,14 @@ If you touch `src/store/tab.ts`, keep the concurrent tests. That file is the
 most concurrency-sensitive in the repository, and the tests that prove two
 detectors cannot lose each other's writes are the ones that matter.
 
+## Adding an add-on
+
+`skills/kidnap-addon/SKILL.md` is the procedure. In short: capture the site's
+responses with `scripts/capture.mjs`, measure your rule against the capture
+before believing it, cut the fixture from that capture, and check
+`node scripts/coverage.mjs` reports it as captured. A platform whose add-on
+extracts nothing is removed and documented, not left in place.
+
 ## Fixtures
 
 A fixture must be cut from a response the site actually sent, not written to

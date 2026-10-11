@@ -15,6 +15,13 @@ backend, no analytics, and no remote code.
 3. Read `LIMITATIONS.md` before touching stream assembly or DRM handling. Both
    are deliberate positions with reasons.
 
+## Before you add or change an add-on
+
+Read `skills/kidnap-addon/SKILL.md`. It covers capturing a site's real
+responses, and why four add-ons that passed their tests matched nothing. The
+short version: never write a path you have not seen in a response, and never
+write a fixture to match a rule you are testing.
+
 ## Ground rules
 
 - `src/core/` is pure. It imports nothing from `chrome.*` and nothing from the
