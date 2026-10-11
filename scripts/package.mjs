@@ -22,7 +22,7 @@ for (const target of ['chromium', 'firefox']) {
     console.error('zip failed. Install the zip command, or archive dist/ by hand.');
     process.exit(zipped.status ?? 1);
   }
-  console.log(`artifacts/kidnap-${version}-${target}.${ext}`);
+  console.log(`artifacts/kidnap-${version}-${target}.zip`);
 }
 
 rmSync(resolve(root, 'dist'), { recursive: true, force: true });
