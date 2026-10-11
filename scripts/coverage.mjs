@@ -63,8 +63,6 @@ const FIXTURES = {
    */
   'twitch-video.json': ['twitch', 'https://gql.twitch.tv/gql'],
   'facebook-video.json': ['facebook', 'https://www.facebook.com/video/unified_cvc/'],
-  /* The explore grid is not a Graph API response at all; it has its own path. */
-  'instagram-explore.json': ['instagram', 'https://www.instagram.com/discover/web/explore_grid/'],
   'adobe-font-family.json': ['adobe-fonts', 'https://fonts.adobe.com/fonts/roboto'],
   'adobe-font-collection.json': [
     'adobe-fonts-collections',

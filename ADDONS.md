@@ -249,6 +249,10 @@ Instagram is in the same position, and for the same reason:
 what was not: the feed handed over no media at all, so no rule there has been
 run against a real response yet.
 
+[Reddit responses](docs/reddit-responses.md) is the odd one out: its feed is
+server-rendered custom elements, so its existing rules read an endpoint a
+browser never calls.
+
 ## What add-ons cannot do
 
 - Cannot execute code, by construction.

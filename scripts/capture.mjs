@@ -67,6 +67,37 @@ const SITES = {
     userProbe: (node) => node?.core?.user_results?.result ?? null,
   },
 
+  reddit: {
+    id: 'reddit',
+    label: 'Reddit',
+    base: 'https://www.reddit.com',
+    cookies: 'Downloads/www.reddit.com_cookies.txt',
+    matches: (url) => /\/svc\/|\/api\/|gql\.reddit|\.json(\?|$)/.test(url),
+    mediaKeys: [
+      'reddit_video',
+      'secure_media',
+      'media_metadata',
+      'preview',
+      'gallery_data',
+      'fallback_url',
+    ],
+    surfaces: [
+      { name: 'home', url: '/', scroll: 8 },
+      { name: 'popular', url: '/r/popular/', scroll: 5 },
+      { name: 'profile', url: '/user/spez/', scroll: 4 },
+    ],
+    discover: {
+      sub: {
+        from: 'home',
+        selector: 'a[href^="/r/"]',
+        strip: /\?.*$/,
+        keep: /^\/r\/[A-Za-z0-9_-]{2,20}\/$/,
+      },
+      post: { from: 'home', selector: 'a[href*="/comments/"]', strip: /\?.*$/ },
+    },
+    userProbe: (node) => node?.author ?? node?.authorName ?? null,
+  },
+
   facebook: {
     id: 'facebook',
     label: 'Facebook',
