@@ -57,6 +57,20 @@ Posters are held in memory for the life of the panel and are not written to
 disk. They are a derived view of a file that can already be downloaded, and
 caching them would cost storage to avoid work that is cheap to repeat.
 
+## Sites waiting on an account or a capture
+
+Reachable and worth doing, in rough order of how easy they look:
+
+- Pixiv. very media-dense, a clean JSON endpoint under `/ajax/`.
+- Tumblr. `/api/v2/blog/<name>/posts`, tidy and regular.
+- VK and VK Video. rich, and more complicated.
+- Imgur. The gallery is embedded, and needs a two-stage parse.
+- Bandcamp. Needs a page-world scraper, because the track list is rendered
+  into the HTML rather than fetched.
+
+`scripts/capture.mjs` reads the shared cookie jar, so a signed-in capture of any
+of these is `node scripts/capture.mjs --site=<name>` once a profile exists.
+
 ## Add-on coverage
 
 Add-ons read a JSON API, or, where a site offers no API that may be called,
@@ -64,8 +78,12 @@ JSON that the site renders into its own page. Adobe Fonts is the second kind:
 its catalogue is in a script tag, and an add-on declares where that starts and
 ends. Two things this version still does not attempt:
 
-- **Page globals.** Bandcamp exposes track data on `window.TralbumData`. Reading
-  it would need a page-world scraper, which is a second extension point.
+- **Page globals.** Bandcamp exposes track data on `window.TralbumData`.
+  Confirmed current on a live album page: the global is present, and no script
+  tag in the document contains it, so it is assigned at runtime rather than
+  embedded. That makes it invisible to the `embedded` marker, which reads
+  markup, and reading it needs a page-world scraper, which is a second
+  extension point.
 - **Client id scraping.** SoundCloud requires a client id that is extracted by
   regex from a minified JavaScript bundle. That breaks whenever they ship a
   new bundle, and v2 shipped exactly that.

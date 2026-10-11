@@ -67,6 +67,69 @@ const SITES = {
     userProbe: (node) => node?.core?.user_results?.result ?? null,
   },
 
+  bandcamp: {
+    id: 'bandcamp',
+    label: 'Bandcamp',
+    base: 'https://bandcamp.com',
+    cookies: 'shared',
+    /*
+     * Bandcamp serves no API to a browser, and what the discover page does send
+     * carries ids and titles without a single media URL.
+     *
+     * The catalogue is on `window.TralbumData`, and it is a live object rather
+     * than text in the page: assigning it runs a script, so it never appears in
+     * the markup an embedded marker can cut. Confirmed on a live album page,
+     * where the global is present and no script tag contains it.
+     *
+     * Reading it needs a page-world scraper, which is the extension point
+     * LIMITATIONS.md lists as not attempted. A capture of this site will keep
+     * finding almost nothing, and that is the site rather than the matcher.
+     */
+    matches: (url) => /\/api\/|bandcamp\.com\/(api|EmbeddedPlayer)/.test(url),
+    mediaKeys: ['trackinfo', 'id', 'title', 'artist', 'file'],
+    surfaces: [
+      { name: 'discover', url: '/discover', scroll: 5 },
+      { name: 'browse', url: '/music', scroll: 4 },
+    ],
+    discover: {
+      album: {
+        from: 'discover',
+        selector: 'a[href*="bandcamp.com/album/"], a[href*="bandcamp.com/track/"]',
+        strip: /\?.*$/,
+      },
+    },
+    userProbe: (node) => node?.artist ?? null,
+  },
+
+  pixiv: {
+    id: 'pixiv',
+    label: 'Pixiv',
+    base: 'https://www.pixiv.net',
+    cookies: 'shared',
+    matches: (url) => /\/ajax\/|\/v1\/|\/v2\//.test(url),
+    mediaKeys: [
+      'image_urls',
+      'original_image_url',
+      'ugoira_metadata',
+      'body',
+      'series',
+      'illust',
+    ],
+    surfaces: [
+      { name: 'recommended', url: '/', scroll: 8 },
+      { name: 'ranking', url: '/ranking.php?mode=daily&content=illust', scroll: 5 },
+    ],
+    discover: {
+      illust: {
+        from: 'recommended',
+        selector: 'a[href*="/artworks/"]',
+        strip: /\?.*$/,
+        keep: /^\/artworks\/[0-9]+$/,
+      },
+    },
+    userProbe: (node) => node?.user ?? node?.userAccount ?? null,
+  },
+
   pinterest: {
     id: 'pinterest',
     label: 'Pinterest',
@@ -413,13 +476,41 @@ function userShape(body, probe) {
  * to map: it is what most people actually use. Only sites that withhold media
  * from anonymous visitors need one.
  */
-function readCookies(file) {
+/**
+ * Cookies for one site, from either a per-site file or the shared jar.
+ *
+ * A shared jar holds every site at once and is far easier to keep current, so
+ * `cookies: 'shared'` takes everything matching the site's host. Matching is on
+ * the registrable domain so a cookie set for `.example.com` is offered to
+ * `www.example.com`.
+ */
+function siteDomain(base) {
+  const host = new URL(base).hostname.replace(/^www\./, '');
+  return host;
+}
+
+function readCookies(file, base) {
   if (!existsSync(file)) return [];
   const cookies = [];
+  let wanted = null;
+  if (base) {
+    wanted = siteDomain(base);
+    const parts = wanted.split('.');
+    /* .co.uk and friends: the registrable domain is the last two labels. */
+    const tail =
+      parts.length > 2 &&
+      parts.slice(-2).join('.') in
+        { 'co.uk': 1, 'com.au': 1, 'co.id': 1, 'com.br': 1, 'co.jp': 1 }
+        ? parts.slice(-3).join('.')
+        : parts.slice(-2).join('.');
+    wanted = tail;
+  }
   for (const line of readFileSync(file, 'utf8').split('\n')) {
     if (!line.trim() || line.startsWith('#')) continue;
     const f = line.split('\t');
     if (f.length < 7) continue;
+    const domain = f[0].replace(/^\./, '');
+    if (wanted && domain !== wanted && !domain.endsWith('.' + wanted)) continue;
     cookies.push({
       name: f[5],
       value: f[6],
@@ -435,8 +526,15 @@ function readCookies(file) {
 }
 
 async function run(site) {
-  const cookieFile =
-    process.env.COOKIES ?? (site.cookies ? resolve(process.env.HOME, site.cookies) : null);
+  const jar =
+    process.env.COOKIES ??
+    (site.cookies === 'shared'
+      ? resolve(process.env.HOME, 'Downloads/cookies.txt')
+      : site.cookies
+        ? resolve(process.env.HOME, site.cookies)
+        : null);
+  const cookieFile = jar;
+  const useSiteFilter = process.env.COOKIES === undefined && site.cookies === 'shared';
   const ctx = await chromium.launchPersistentContext(
     mkdtempSync(join(tmpdir(), 'kidnap-capture-')),
     {
@@ -461,7 +559,7 @@ async function run(site) {
    */
   const savedBodies = new Set();
   const page = await ctx.newPage();
-  const cookies = cookieFile ? readCookies(cookieFile) : [];
+  const cookies = cookieFile ? readCookies(cookieFile, useSiteFilter ? site.base : null) : [];
   if (cookies.length > 0) await ctx.addCookies(cookies);
   console.error(
     `> cookies: ${cookies.length ? cookies.length + ' from ' + cookieFile : 'none, browsing signed out'}`,
