@@ -61,12 +61,30 @@ caching them would cost storage to avoid work that is cheap to repeat.
 
 Reachable and worth doing, in rough order of how easy they look:
 
-- Pixiv. very media-dense, a clean JSON endpoint under `/ajax/`.
-- Tumblr. `/api/v2/blog/<name>/posts`, tidy and regular.
+- Tumblr. `/api/v2/blog/<name>/posts`, tidy and regular. Not started.
 - VK and VK Video. rich, and more complicated.
+- Pixiv. see below; reachable, but not by the path expected.
 - Imgur. The gallery is embedded, and needs a two-stage parse.
 - Bandcamp. Needs a page-world scraper, because the track list is rendered
   into the HTML rather than fetched.
+
+### Pixiv
+
+Signed in, the recommended feed renders sixty to sixty-five illusts and loads
+two dozen thumbnails from `i.pximg.net`. Those thumbnails are cropped: the path
+is `/c/540x540_70/img-master/…`, where the trailing `_70` is a quality figure
+and the original is `/img-master/…` or `/img-original/…`.
+
+The data is not in an `/ajax/` response, of which the page makes a dozen and
+every one of them carries a user profile or a preference rather than an illust.
+It is in `__NEXT_DATA__`, around 77 KB, under `props.pageProps`, but that
+namespace holds `dehydratedState` and `serverSerializedPreloadedState`, which is
+a serialised Redux store rather than a documented shape.
+
+So the illusts are there and the keys are not obvious, which is the worst
+combination: enough evidence that it works, none of what it looks like. It was
+left unmapped rather than guessed at, which is what
+`skills/kidnap-addon/SKILL.md` asks for.
 
 `scripts/capture.mjs` reads the shared cookie jar, so a signed-in capture of any
 of these is `node scripts/capture.mjs --site=<name>` once a profile exists.
