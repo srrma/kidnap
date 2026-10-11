@@ -352,6 +352,29 @@ const instagramRules: RuleSpec[] = IG_MEDIA_PATHS.flatMap((path) => [
   { at: `${path}.carousel_media[].image_versions2.candidates[]`, media: igChildImage },
 ]);
 
+/*
+ * One pin, wherever it is found. `orig` is the rendition Pinterest itself
+ * serves for downloads; the 236x/474x/736x entries are what the grid shows.
+ */
+const PINTEREST_PIN: MediaSpec = {
+  url: 'images.orig.url',
+  width: 'images.orig.width',
+  height: 'images.orig.height',
+  /*
+   * No thumbnail. The smaller renditions are keyed `236x`, `474x` and `736x`,
+   * and the path language cannot address a key beginning with a digit, so a
+   * preview row loads the original. That costs bandwidth on a feed of two
+   * thousand pins, which is worth fixing, but not by teaching the parser one
+   * more grammar rule for a single site.
+   */
+  caption: 'grid_title',
+  alt: 'auto_alt_text',
+  author: 'pinner.username',
+  published: 'created_at',
+  postId: 'id',
+  postUrl: { template: 'https://www.pinterest.com/pin/{id}/', values: { id: 'id' } },
+};
+
 export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   {
     id: 'x',
@@ -466,6 +489,33 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
           postId: '^id',
           postUrl: { template: 'https://imgur.com/{id}', values: { id: '^id' } },
         },
+      },
+    ],
+  },
+
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    hosts: ['pinterest.com', 'pinimg.com', 'pin.it'],
+    apiPaths: ['/resource/'],
+    /*
+     * Pinterest serves its feeds through named `/resource/…/get/` endpoints
+     * that all answer with `resource_response.data`. The shape of a pin is the
+     * same on every one of them; only the path to it changes, so the home feed
+     * and search differ by one segment.
+     *
+     * `images` holds six renditions, `orig` being the one worth saving. The
+     * file name carries the extension, so nothing has to be asserted for the
+     * URL to be classified.
+     */
+    rules: [
+      {
+        at: 'resource_response.data[]',
+        media: PINTEREST_PIN,
+      },
+      {
+        at: 'resource_response.data.results[]',
+        media: PINTEREST_PIN,
       },
     ],
   },

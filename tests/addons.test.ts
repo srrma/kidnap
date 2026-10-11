@@ -548,6 +548,7 @@ describe('validation', () => {
       'x',
       'reddit',
       'instagram',
+      'pinterest',
       'tiktok',
       'imgur',
       'bsky',
@@ -760,5 +761,59 @@ describe('instagram', () => {
       );
       expect(asImage).toHaveLength(0);
     }
+  });
+});
+
+describe('pinterest', () => {
+  /*
+   * Pinterest answers every feed with resource_response.data and keeps the same
+   * pin shape on all of them, so the home feed and search differ only by one
+   * segment. Both fixtures are cut from a signed-in capture: 24 pins came back
+   * from the home feed and 25 from a search, every one carrying six image
+   * renditions.
+   */
+  const CASES: Array<[string, string, string]> = [
+    [
+      'home feed',
+      'pinterest-home.json',
+      'https://www.pinterest.com/resource/UserHomefeedResource/get/',
+    ],
+    [
+      'search',
+      'pinterest-search.json',
+      'https://www.pinterest.com/resource/BaseSearchResource/get/',
+    ],
+  ];
+
+  for (const [name, file, url] of CASES) {
+    it(`reads pins from the ${name}, as the site serves them`, () => {
+      const items = extract(url, fixture(file));
+      expect(items.length).toBeGreaterThan(0);
+
+      for (const item of items) {
+        expect(item.detector).toBe('addon');
+        expect(item.kind).toBe('image');
+        expect(item.url).toContain('i.pinimg.com/originals/');
+        expect(item.author).toBe('sample_user');
+        expect(item.caption).toBeTruthy();
+        expect(item.pageUrl).toMatch(/^https:\/\/www\.pinterest\.com\/pin\//);
+      }
+
+      /*
+       * `orig` rather than one of the grid renditions: 236x, 474x and 736x are
+       * what the feed displays, and saving one of those would quietly discard
+       * most of the image.
+       */
+      const [first] = items;
+      expect(first?.width).toBeGreaterThan(736);
+    });
+  }
+
+  it('reads the publication date, which arrives in RFC 2822 form', () => {
+    const [item] = extract(
+      'https://www.pinterest.com/resource/UserHomefeedResource/get/',
+      fixture('pinterest-home.json'),
+    );
+    expect(item?.published).toBe('2025-09-12T04:50:42.000Z');
   });
 });

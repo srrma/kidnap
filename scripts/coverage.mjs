@@ -63,6 +63,14 @@ const FIXTURES = {
    */
   'twitch-video.json': ['twitch', 'https://gql.twitch.tv/gql'],
   'facebook-video.json': ['facebook', 'https://www.facebook.com/video/unified_cvc/'],
+  'pinterest-home.json': [
+    'pinterest',
+    'https://www.pinterest.com/resource/UserHomefeedResource/get/',
+  ],
+  'pinterest-search.json': [
+    'pinterest',
+    'https://www.pinterest.com/resource/BaseSearchResource/get/',
+  ],
   'adobe-font-family.json': ['adobe-fonts', 'https://fonts.adobe.com/fonts/roboto'],
   'adobe-font-collection.json': [
     'adobe-fonts-collections',

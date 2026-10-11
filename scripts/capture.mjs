@@ -67,6 +67,38 @@ const SITES = {
     userProbe: (node) => node?.core?.user_results?.result ?? null,
   },
 
+  pinterest: {
+    id: 'pinterest',
+    label: 'Pinterest',
+    base: 'https://www.pinterest.com',
+    cookies: 'Downloads/id.pinterest.com_cookies.txt',
+    matches: (url) => /\/resource\/|\/graphql|pinimg\.com|\/v1\/pins/.test(url),
+    mediaKeys: [
+      'images',
+      'image_large',
+      'videos',
+      'video_list',
+      'story_pin_data',
+      'grid_title',
+      'closeup_unified_description',
+    ],
+    surfaces: [
+      { name: 'home', url: '/', scroll: 8 },
+      { name: 'search', url: '/search/pins/?q=typography', scroll: 4 },
+      { name: 'topics', url: '/today/', scroll: 3 },
+    ],
+    discover: {
+      pin: {
+        from: 'home',
+        selector: 'a[href^="/pin/"]',
+        strip: /\?.*$/,
+        keep: /^\/pin\/[0-9a-f-]+\/$/,
+      },
+      board: { from: 'home', selector: 'a[href^="/"][href*="/"]', strip: /\?.*$/ },
+    },
+    userProbe: (node) => node?.owner ?? node?.native_creator ?? node?.pinner ?? null,
+  },
+
   bsky: {
     id: 'bsky',
     label: 'Bluesky',
