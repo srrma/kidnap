@@ -99,6 +99,49 @@ const SITES = {
     userProbe: (node) => node?.owner ?? node?.native_creator ?? node?.pinner ?? null,
   },
 
+  behance: {
+    id: 'behance',
+    label: 'Behance',
+    base: 'https://www.behance.net',
+    cookies: 'Downloads/www.behance.net_cookies.txt',
+    matches: (url) => /\/v[0-9]+\/|\/api\//.test(url),
+    mediaKeys: ['images', 'thumbnail', 'project', 'assets', 'cover', 'video'],
+    surfaces: [
+      { name: 'feed', url: '/', scroll: 6 },
+      { name: 'search', url: '/search/projects?search=typography', scroll: 4 },
+      { name: 'galleries', url: '/galleries', scroll: 4 },
+    ],
+    discover: {
+      project: {
+        from: 'feed',
+        selector: 'a[href^="/gallery/"]',
+        strip: /\?.*$/,
+        keep: /^\/gallery\/[0-9]+\/[\w-]+\/$/,
+      },
+    },
+    userProbe: (node) => node?.owner ?? node?.creator ?? null,
+  },
+
+  adobestock: {
+    id: 'adobestock',
+    label: 'Adobe Stock',
+    base: 'https://stock.adobe.com',
+    cookies: 'Downloads/stock.adobe.com_cookies.txt',
+    /*
+     * Stock serves almost nothing over fetch: the catalogue is rendered into a
+     * script tag in the page. Only the small JSON endpoints are matched here,
+     * which is why a capture of this site finds so little.
+     */
+    matches: (url) => /\/api\/|\/QuerySuggestion|\/stocknav/.test(url),
+    mediaKeys: ['images', 'thumbnail', 'video_previews', 'content', 'width', 'height'],
+    surfaces: [
+      { name: 'search', url: '/search/images?k=typography', scroll: 4 },
+      { name: 'search-video', url: '/search/videos?k=nature', scroll: 4 },
+      { name: 'collections', url: '/collections', scroll: 3 },
+    ],
+    userProbe: (node) => node?.author ?? node?.creator ?? null,
+  },
+
   bsky: {
     id: 'bsky',
     label: 'Bluesky',
@@ -411,6 +454,12 @@ async function run(site) {
   if (bodies) mkdirSync(bodies, { recursive: true });
 
   const responses = new Map();
+  /*
+   * Tracked separately from `responses`: an endpoint's first response is often
+   * a bootstrap that carries nothing, and keying the save off the map meant the
+   * payload that actually mattered was the one never written.
+   */
+  const savedBodies = new Set();
   const page = await ctx.newPage();
   const cookies = cookieFile ? readCookies(cookieFile) : [];
   if (cookies.length > 0) await ctx.addCookies(cookies);
@@ -466,7 +515,8 @@ async function run(site) {
 
     /* Kept only for endpoints that carry media, and only the first response of
        each, so a capture stays small enough to read. */
-    if (bodies && paths.length > 0 && !responses.has(name)) {
+    if (bodies && paths.length > 0 && !savedBodies.has(name)) {
+      savedBodies.add(name);
       writeFileSync(
         join(
           bodies,

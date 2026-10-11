@@ -1,0 +1,77 @@
+{
+  "data": {
+    "search": {
+      "nodes": [
+        {
+          "id": 255482413,
+          "name": "sample project 0",
+          "url": "https://www.behance.net/gallery/255482413/Type-Explorations-II",
+          "publishedOn": "2026-01-15T10:00:00.000Z",
+          "modifiedOn": 1790787224,
+          "slug": "Type-Explorations-II",
+          "owners": [
+            {
+              "username": "sample_creator",
+              "url": "https://www.behance.net/lapa_piotr"
+            }
+          ],
+          "covers": {
+            "allAvailable": [
+              {
+                "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/13fb81255482413.Y3JvcCwxODQxLDE0MzksMCww.jpg",
+                "width": null,
+                "type": "WEBP"
+              }
+            ]
+          }
+        },
+        {
+          "id": 240051815,
+          "name": "sample project 1",
+          "url": "https://www.behance.net/gallery/240051815/Molten-Serif-Typeface-Free",
+          "publishedOn": "2026-01-15T10:00:00.000Z",
+          "modifiedOn": 1777430434,
+          "slug": "Molten-Serif-Typeface-Free",
+          "owners": [
+            {
+              "username": "sample_creator",
+              "url": "https://www.behance.net/Dazor"
+            }
+          ],
+          "covers": {
+            "allAvailable": [
+              {
+                "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/36dbd8240051815.Y3JvcCwxMjkxLDEwMTAsMzgsMA.png",
+                "width": null,
+                "type": "WEBP"
+              }
+            ]
+          }
+        },
+        {
+          "id": 196367641,
+          "name": "sample project 2",
+          "url": "https://www.behance.net/gallery/196367641/Vitrium-Opus-3D-Glass-Typography-Posters",
+          "publishedOn": "2026-01-15T10:00:00.000Z",
+          "modifiedOn": 1785853196,
+          "slug": "Vitrium-Opus-3D-Glass-Typography-Posters",
+          "owners": [
+            {
+              "username": "sample_creator",
+              "url": "https://www.behance.net/ionL"
+            }
+          ],
+          "covers": {
+            "allAvailable": [
+              {
+                "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/6cacf1196367641.Y3JvcCwzNDEzLDI2NzAsMCww.jpg",
+                "width": null,
+                "type": "WEBP"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

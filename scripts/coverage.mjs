@@ -71,6 +71,8 @@ const FIXTURES = {
     'pinterest',
     'https://www.pinterest.com/resource/BaseSearchResource/get/',
   ],
+  'behance-feed.json': ['behance', 'https://www.behance.net/v3/graphql'],
+  'behance-search.json': ['behance', 'https://www.behance.net/v3/graphql'],
   'adobe-font-family.json': ['adobe-fonts', 'https://fonts.adobe.com/fonts/roboto'],
   'adobe-font-collection.json': [
     'adobe-fonts-collections',

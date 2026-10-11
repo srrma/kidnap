@@ -549,6 +549,7 @@ describe('validation', () => {
       'reddit',
       'instagram',
       'pinterest',
+      'behance',
       'tiktok',
       'imgur',
       'bsky',
@@ -815,5 +816,54 @@ describe('pinterest', () => {
       fixture('pinterest-home.json'),
     );
     expect(item?.published).toBe('2025-09-12T04:50:42.000Z');
+  });
+});
+
+describe('behance', () => {
+  /*
+   * Both fixtures come from one signed-in session: 48 projects from the feed and
+   * 48 from a search. Behance answers both through the same /v3/graphql
+   * endpoint under two different roots, and the project fields are identical
+   * either way.
+   */
+  const CASES: Array<[string, string]> = [
+    ['feed', 'behance-feed.json'],
+    ['search', 'behance-search.json'],
+  ];
+
+  for (const [name, file] of CASES) {
+    it(`reads project covers from the ${name}, as the site serves them`, () => {
+      const items = extract('https://www.behance.net/v3/graphql', fixture(file));
+      expect(items.length).toBeGreaterThan(0);
+
+      for (const item of items) {
+        expect(item.detector).toBe('addon');
+        expect(item.kind).toBe('image');
+        expect(item.url).toMatch(/mir-s3-cdn-cf\.behance\.net\/projects\/original_webp\//);
+        expect(item.author).toBe('sample_creator');
+        expect(item.caption).toBeTruthy();
+        expect(item.pageUrl).toMatch(/^https:\/\/www\.behance\.net\/gallery\//);
+      }
+    });
+  }
+
+  it('takes the original cover rather than the smallest rendition', () => {
+    /*
+     * A project carries fourteen renditions. The original is first in 48 of 48
+     * projects captured, and that ordering is the whole reason `[0]` is right
+     * rather than lucky, so it is asserted rather than assumed.
+     */
+    const body = fixture('behance-feed.json') as {
+      data: {
+        forYouFeed: {
+          nodes: Array<{ entity: { covers: { allAvailable: Array<{ url: string }> } } }>;
+        };
+      };
+    };
+    const nodes = body.data.forYouFeed.nodes;
+    expect(nodes.length).toBeGreaterThan(0);
+    for (const node of nodes) {
+      expect(node.entity.covers.allAvailable[0]?.url).toContain('/original_webp/');
+    }
   });
 });

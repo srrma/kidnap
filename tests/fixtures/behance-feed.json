@@ -1,0 +1,86 @@
+{
+  "data": {
+    "forYouFeed": {
+      "nodes": [
+        {
+          "__typename": "Project",
+          "entity": {
+            "id": 251095803,
+            "name": "sample project 0",
+            "url": "https://www.behance.net/gallery/251095803/HUAWEI-AITO-M6",
+            "publishedOn": "2026-01-15T10:00:00.000Z",
+            "modifiedOn": 1789070505,
+            "slug": "HUAWEI-AITO-M6",
+            "owners": [
+              {
+                "username": "sample_creator",
+                "url": "https://www.behance.net/landai22212c1"
+              }
+            ],
+            "covers": {
+              "allAvailable": [
+                {
+                  "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/0b76fe251095803.Y3JvcCwyNDQ2LDE5MTMsNzIwLDIxMQ.jpg",
+                  "width": null,
+                  "type": "WEBP"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "__typename": "Project",
+          "entity": {
+            "id": 252631465,
+            "name": "sample project 1",
+            "url": "https://www.behance.net/gallery/252631465/Alice-in-Bloom",
+            "publishedOn": "2026-01-15T10:00:00.000Z",
+            "modifiedOn": 1791001425,
+            "slug": "Alice-in-Bloom",
+            "owners": [
+              {
+                "username": "sample_creator",
+                "url": "https://www.behance.net/polinawashington"
+              }
+            ],
+            "covers": {
+              "allAvailable": [
+                {
+                  "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/e076cc252631465.Y3JvcCwxNzA3LDEzMzUsMCw2NTA.jpg",
+                  "width": null,
+                  "type": "WEBP"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "__typename": "Project",
+          "entity": {
+            "id": 188385585,
+            "name": "sample project 2",
+            "url": "https://www.behance.net/gallery/188385585/Fruit-wine-packaging",
+            "publishedOn": "2026-01-15T10:00:00.000Z",
+            "modifiedOn": 1791186086,
+            "slug": "Fruit-wine-packaging",
+            "owners": [
+              {
+                "username": "sample_creator",
+                "url": "https://www.behance.net/291799818beea"
+              }
+            ],
+            "covers": {
+              "allAvailable": [
+                {
+                  "url": "https://mir-s3-cdn-cf.behance.net/projects/original_webp/e328be188385585.Y3JvcCwyNDkzLDE5NTAsMjE1LDA.jpg",
+                  "width": null,
+                  "type": "WEBP"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

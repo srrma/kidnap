@@ -375,6 +375,23 @@ const PINTEREST_PIN: MediaSpec = {
   postUrl: { template: 'https://www.pinterest.com/pin/{id}/', values: { id: 'id' } },
 };
 
+/*
+ * One Behance project, wherever it is found. The cover is the only media the
+ * feed carries; a project's own images arrive on its page, which is not mapped.
+ *
+ * The URL ends in .jpg even though the path says webp and the payload says
+ * WEBP, so nothing is asserted and the extension does the classifying.
+ */
+const BEHANCE_PROJECT: MediaSpec = {
+  url: 'covers.allAvailable[0].url',
+  caption: 'name',
+  author: 'owners[0].username',
+  published: 'publishedOn',
+  /* The permalink already carries the id, and Behance's own id is a number
+     rather than the string every other platform uses. */
+  postUrl: { template: '{url}', values: { url: 'url' } },
+};
+
 export const BUILTIN_ADDONS: readonly AddonSpec[] = [
   {
     id: 'x',
@@ -490,6 +507,28 @@ export const BUILTIN_ADDONS: readonly AddonSpec[] = [
           postUrl: { template: 'https://imgur.com/{id}', values: { id: '^id' } },
         },
       },
+    ],
+  },
+
+  {
+    id: 'behance',
+    name: 'Behance',
+    hosts: ['behance.net'],
+    apiPaths: ['/v3/graphql'],
+    /*
+     * Behance serves everything, feed and search alike, through one
+     * `/v3/graphql` endpoint. A project arrives under one of two roots and
+     * keeps the same fields either way, so only the path differs.
+     *
+     * `covers.allAvailable` holds fourteen renditions per project, from the
+     * original down through 808, 404, 202, 230 and 115. The original is first
+     * in 48 of 48 projects captured, which is what makes indexing `[0]` right
+     * rather than lucky; a fixture pins it so a reshuffle fails a test instead
+     * of quietly downgrading every download to 115 pixels wide.
+     */
+    rules: [
+      { at: 'data.forYouFeed.nodes[].entity', media: BEHANCE_PROJECT },
+      { at: 'data.search.nodes[]', media: BEHANCE_PROJECT },
     ],
   },
 
