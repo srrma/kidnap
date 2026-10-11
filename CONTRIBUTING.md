@@ -23,10 +23,12 @@ is usually faster than working out why something is the way it is.
 - `src/bus/protocol.ts` is the only place a cross-context payload is declared.
   Never cast a payload with `as`; if the type is wrong, fix the protocol.
 - Add-ons are JSON. An add-on that needs code is the wrong shape.
-- Comments explain behaviour, an invariant, or a non-obvious reason. Nothing
+- Comments explain behavior, an invariant, or a non-obvious reason. Nothing
   else, and never anything about how the code came to be written.
-- No new runtime dependency without discussing it first. The extension ships
-  one, and it is there because hand-rolling a container parser is worse.
+- No new runtime dependency without discussing it first. Two ship:
+  `mediabunny`, which is there because hand-rolling a container parser is
+  worse, and `wawoff2`, whose wasm binding is copied into the sandbox verbatim
+  rather than bundled.
 
 ## Adding a site
 
@@ -56,7 +58,7 @@ detectors cannot lose each other's writes are the ones that matter.
 `skills/kidnap-addon/SKILL.md` is the procedure. In short: capture the site's
 responses with `scripts/capture.mjs`, measure your rule against the capture
 before believing it, cut the fixture from that capture, and check
-`node scripts/coverage.mjs` reports it as captured. A platform whose add-on
+`npm run coverage` reports it as captured. A platform whose add-on
 extracts nothing is removed and documented, not left in place.
 
 ## Fixtures
@@ -66,7 +68,7 @@ match a rule. A rule tested against a fixture built to agree with it proves
 nothing, which is how X, Instagram and their tests all passed while extracting
 nothing from the live site.
 
-`node scripts/coverage.mjs` prints which fixtures are captured and which are
+`npm run coverage` prints which fixtures are captured and which are
 hand-written. When adding a platform, the fixture has to be a capture.
 
 ## Commits

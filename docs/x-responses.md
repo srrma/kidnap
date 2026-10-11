@@ -1,6 +1,8 @@
 # X / Twitter responses
 
-What x.com actually sends, recorded so nobody has to guess it again.
+Media lives at the end of a long path whose middle changes per surface, which
+is what makes a plausible-looking path so easy to get wrong. This records what
+the site actually sends.
 
 Two shapes for one endpoint cost this project twice, and both times the rule
 looked correct and simply matched nothing. A path that is merely plausible is
@@ -11,7 +13,7 @@ Everything marked **verified** here was cut from a live signed-in response, is
 kept as a fixture under `tests/fixtures/`, and is asserted by a test. Anything
 else says so plainly.
 
-Regenerate the whole thing with:
+## Regenerating
 
 ```bash
 SAVE=1 node scripts/capture.mjs --site=x         # browse, then write the report
@@ -74,11 +76,10 @@ kept, because the older spelling still turns up on other entry points.
 
 **The home timeline was missing entirely** while search and a tweet opened
 directly both worked, which is exactly the report that started this document.
-The rule existed but was written against the sibling shape. Fixed: across the five
-captured bodies the add-on now yields 276 rows, every one carrying an author,
-where it had yielded 57 from the home timeline and nothing from the other four.
-Confirmed live afterwards on search, a profile and a profile's media tab:
-21, 38 and 95 rows, all with authors.
+The rule existed but was written against the sibling shape. Fixed: every timeline fixture
+now yields rows that each carry an author, and the search, profile and profile
+media surfaces are covered by their own fixtures. `npm run coverage` prints the
+row count per add-on from those fixtures.
 
 **The profile root is `timeline.timeline`, not `timeline_v2.timeline`.** A
 plausible-looking name that matches nothing.

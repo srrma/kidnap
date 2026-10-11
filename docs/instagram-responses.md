@@ -1,17 +1,14 @@
 # Instagram responses
 
-What instagram.com actually sends, recorded so nobody has to guess it again.
-
-This exists for the same reason as [X responses](x-responses.md): a rule
-written against a plausible path looks exactly like a working one until a real
-page is loaded. Instagram proved it the hard way; see the first entry under
-Traps, which had been passing its own test the entire time while extracting
-nothing from anywhere.
+A rule written against a plausible path looks exactly like a working one until
+a real page is loaded. Instagram proved it the hard way; see the first entry
+under Traps, which had been passing its own test the entire time while
+extracting nothing from anywhere.
 
 Everything marked **verified** was cut from a live signed-in response, is kept
 under `tests/fixtures/`, and is asserted by a test.
 
-Regenerate:
+## Regenerating
 
 ```bash
 SAVE=1 node scripts/capture.mjs --site=instagram

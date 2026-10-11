@@ -41,8 +41,8 @@ read(scope as never, '^author');   // the post, or the child?
 
 Copy the nesting, not the names.
 
-**X / Twitter.** Media is at `…result.legacy.extended_entities.media[]`, video at
-`…media[].video_info.variants[]`. Root differs per surface:
+**X / Twitter.** Media is at `…result.legacy.extended_entities.media[]`, video
+at `…media[].video_info.variants[]`. Root differs per surface:
 `data.home.home_timeline_urt`, `data.search_by_raw_query.search_timeline.timeline`,
 `data.user.result.timeline.timeline`, `data.bookmark_timeline_v2.timeline`,
 `data.threaded_conversation_with_injections_v2`. Quoted tweets add
@@ -71,10 +71,11 @@ rendition. `created_at` is RFC 2822 and parses.
 `data.search.nodes[]`, both through `/v3/graphql`. `covers.allAvailable[0].url` is the original; the original
 is first in every project captured, and there is a test saying so.
 
-**Imgur.** A gallery page carries its own contents in
+**Imgur.** The gallery API answers under `/3/gallery/{id}` and
+`/api/album/{id}/images`, so `data` is the album and `data.images[]` each
+image. A gallery page also carries its own contents in
 `window.postDataJSON="{…}"`, which is JSON written as a JavaScript string
-literal. Needs a two-stage parse and a marker placed *before* the payload rather
-than being its opening. Not implemented yet.
+literal and would need a two-stage parse. The API shape is what ships.
 
 ## What `classify` will throw away
 
@@ -123,4 +124,4 @@ posters are not offered twice. Values come from a capture and will not mean
 anything to the next reader.
 
 A fixture is **captured** or **hand-written**, and only the first is evidence.
-`node scripts/coverage.mjs` prints which each one is.
+`npm run coverage` prints which each one is.

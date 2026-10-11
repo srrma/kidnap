@@ -62,9 +62,8 @@ caching them would cost storage to avoid work that is cheap to repeat.
 Reachable and worth doing, in rough order of how easy they look:
 
 - Tumblr. `/api/v2/blog/<name>/posts`, tidy and regular. Not started.
-- VK and VK Video. rich, and more complicated.
-- Pixiv. see below; reachable, but not by the path expected.
-- Imgur. The gallery is embedded, and needs a two-stage parse.
+- VK and VK Video. Rich, and more complicated.
+- Pixiv. Reachable, but not by the path expected; see below.
 - Bandcamp. Needs a page-world scraper, because the track list is rendered
   into the HTML rather than fetched.
 

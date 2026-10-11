@@ -1,14 +1,14 @@
 # Adobe responses
 
-Adobe runs several sites behind one login. [Adobe Fonts](x-responses.md)'s
-sibling `docs/adobe-fonts` work already covers `fonts.adobe.com`. This file
-records Behance, which is now supported, and Adobe Stock, which is not.
+Adobe runs several sites behind one login. The `adobe-fonts` and
+`adobe-fonts-collections` add-ons cover `fonts.adobe.com`. This file records
+Behance, which is supported, and Adobe Stock, which is not.
 
 All Behance findings are **verified**: cut from a signed-in capture, kept under
 `tests/fixtures/`, asserted by a test. Adobe Stock is recorded as unmapped,
 with the reason.
 
-Regenerate:
+## Regenerating
 
 ```bash
 SAVE=1 node scripts/capture.mjs --site=behance
@@ -35,24 +35,23 @@ name, slug
 url                the full permalink
 owners[0].username who made it
 publishedOn        ISO 8601
-covers.allAvailable[]   fourteen renditions
+covers.allAvailable[]   every rendition, largest first
 sourceFiles[]      only on a project's own page
 ```
 
-`covers.allAvailable` is the whole cover at fourteen sizes: `original`, then 808,
-404, 202, 230 and 115, repeated across aspect ratios. **The original is first
-in 48 of 48 projects captured**, in both the feed and a search of 48 more. That
-is what makes `covers.allAvailable[0]` right rather than lucky, and there is a
-test asserting it, a reshuffle would otherwise fail quietly, downgrading every
-download to 115 pixels wide.
+`covers.allAvailable` is the whole cover at several sizes: `original` first,
+then the grid renditions down to a thumbnail around 115 pixels wide. The
+original leading the list is what makes `covers.allAvailable[0]` right rather
+than lucky, and there is a test asserting it: a reshuffle would otherwise fail
+quietly, downgrading every download to 115 pixels wide.
 
 The URLs end in `.jpg` even though the path says `webp` and the payload says
 `WEBP`. Nothing is asserted and the extension classifies them.
 
 | Surface | Captured | Extracted |
 | --- | --- | --- |
-| Feed | 48 projects, all with covers | 3 from the fixture, with owner, name and permalink |
-| Search | 48 projects, all with covers | 3 from the fixture, likewise |
+| Feed | signed in, every project carrying a cover | 3 from the fixture, with owner, name and permalink |
+| Search | signed in, same shape | 3 from the fixture, likewise |
 
 ### Traps
 
@@ -96,8 +95,8 @@ keys are assigned per search. Reading it needs either iteration over object
 keys, which the language deliberately does not do, or a second extension point
 that walks a payload and yields values rather than selecting them.
 
-This is the same wall Pinterest hit from the other side, there the problem was
-a key beginning with a digit and here it is the keys themselves, and the
+This is the same wall Pinterest hit from the other side. There the problem was
+a key beginning with a digit, and here it is the keys themselves, and the
 honest answer is the same. The extension point that would fix both is iteration
 over a response's values, not another path rule. That is a language change and
 is named as such rather than worked around.

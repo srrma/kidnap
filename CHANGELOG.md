@@ -8,14 +8,16 @@ every part of it is new.
 ### Added
 
 - A declarative add-on system. Add-ons are JSON, validated on the way in, and
-  cannot execute code. Eight built-ins ship enabled, each backed by a captured
-  response fixture.
+  cannot execute code. Nine built-ins ship, each backed by a captured response
+  fixture.
 - `when` conditions, fixed values, last-path-segment reads and permalink
   templates in the add-on language, each added because a platform needed it.
 - Rewrites now apply to every recorded URL rather than only to URLs the same
   add-on produced, so a rewrite-only add-on works.
-- `scripts/parity.mjs` fails the build if an add-on stops emitting a field the
-  previous extractors emitted.
+- `scripts/parity.mjs` compares the fields each add-on emits against the fields
+  the v2 extractors emitted, and exits non-zero on a gap. It needs a checkout of
+  the v2 source, so it is run by hand (`npm run parity`) rather than by
+  `npm run verify`.
 - Stream assembly through mediabunny, which replaces the unmaintained mux.js.
   Fragmented MP4 streams, rotating encryption keys and byte ranges now work,
   all three of which the previous parser got wrong.

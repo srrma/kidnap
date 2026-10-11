@@ -25,7 +25,7 @@ size: one for the index, one for the items it names.
 Every mutation goes through the store, because a read-modify-write done
 elsewhere races with a detector.
 
-## Consequences
+## Consequence
 
 - Writes are O(n) in bytes rather than O(n squared).
 - The index can briefly lag the item keys. `settle` exists for readers that

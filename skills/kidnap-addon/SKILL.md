@@ -13,10 +13,11 @@ how to know the rule is right.
 
 **Never write a path you have not seen in a real response.**
 
-Four add-ons shipped in this repository that matched nothing at all, and every
-one of them had a passing test. Their fixtures had been written by hand to match
-the rule they were testing, which proves nothing. They were removed rather than
-left in place: Twitch, Facebook, Reddit, and Instagram's original rules.
+Three add-ons shipped here that matched nothing at all, and every one of them
+had a passing test. Their fixtures had been written by hand to match the rule
+they were testing, which proves nothing. They were removed rather than left in
+place: Twitch, Facebook and Reddit. A fourth, Instagram's original rules, was
+found the same way and rewritten against a capture.
 
 The rule is cheap to follow and impossible to unlearn. Capture first.
 
@@ -119,14 +120,14 @@ Anything the capture showed only by its ordering or its position deserves a
 test, because it fails silently:
 
 ```ts
-// Behance: the original cover is first in 48 of 48 projects captured.
+// Behance: the original cover leads the rendition list.
 expect(node.covers.allAvailable[0].url).toContain('/original_webp/');
 ```
 
 ### 6. Check provenance
 
 ```bash
-node scripts/coverage.mjs
+npm run coverage
 ```
 
 Every row should read **captured**. A row reading `hand-written only` is a
@@ -138,7 +139,7 @@ Each of these cost a real bug in this repository.
 
 | Trap | What happens | Guard |
 | --- | --- | --- |
-| Fixture written to match the rule | Test passes, add-on matches nothing | Fixture comes from a capture; check `coverage.mjs` |
+| Fixture written to match the rule | Test passes, add-on matches nothing | Fixture comes from a capture; check `npm run coverage` |
 | Endpoint a browser never calls | Rule is plausible and inert | Check the endpoint appears in a capture |
 | Shape moved | Rule silently stops matching | Capture again when a site goes quiet; fixture fails |
 | `video_versions[]` collapses a level | `^^^` reaches the wrong object | `images.a.b[]` keeps `a` as a step; `video[]` does not |
@@ -167,7 +168,7 @@ sends it in a shape a path cannot name, it is server-rendered, or it is gated.
 
 ```bash
 npm run verify          # 119 tests, typecheck, lint, both builds
-node scripts/coverage.mjs
+npm run coverage
 ```
 
 Then write `docs/<site>-responses.md`, covering the endpoint, the path, what was
@@ -180,7 +181,7 @@ If a platform is already mapped, start there rather than probing blind:
 | --- | --- | --- |
 | X / Twitter | [x-responses.md](../../docs/x-responses.md) | verified |
 | Instagram | [instagram-responses.md](../../docs/instagram-responses.md) | verified |
-| Bluesky |, | verified, public API, no account |
+| Bluesky | none | verified, resolved embed, no account |
 | Pinterest | [pinterest-responses.md](../../docs/pinterest-responses.md) | verified |
 | Behance | [adobe-responses.md](../../docs/adobe-responses.md) | verified |
 | Adobe Fonts | [adobe-responses.md](../../docs/adobe-responses.md) | verified |
@@ -188,5 +189,5 @@ If a platform is already mapped, start there rather than probing blind:
 | Facebook | [facebook-responses.md](../../docs/facebook-responses.md) | removed, no data |
 | Twitch | [twitch-responses.md](../../docs/twitch-responses.md) | removed, no media URL |
 | Adobe Stock | [adobe-responses.md](../../docs/adobe-responses.md) | unmapped, dynamic keys |
-| Imgur |, | unmapped, needs a two-stage parse |
-| TikTok |, | unmapped, gated |
+| Imgur | none | verified, gallery API |
+| TikTok | none | verified, item_list |

@@ -9,6 +9,23 @@ you choose, using the session you are already signed in with.
 
 MIT licensed.
 
+## Install it
+
+Grab the zip for your browser from the
+[releases page](https://github.com/srrma/kidnap/releases).
+
+**Chromium.** Open `chrome://extensions`, turn on Developer mode, choose **Load
+unpacked**, and select the folder you unzipped.
+
+**Firefox.** Unzip the file, open `about:debugging#/runtime/this-firefox`, choose
+**Load Temporary Add-on**, and pick `manifest.json` inside the folder. A
+temporary add-on is removed when Firefox closes. For something permanent it has
+to go through addons.mozilla.org.
+
+Unsigned extensions only install this way, and only in Developer mode, so you
+will see a warning that a store build would not produce. The code is the same
+either way.
+
 ## Install it from source
 
 ```bash
@@ -16,22 +33,20 @@ npm install
 npm run build
 ```
 
-Then open `chrome://extensions`, turn on Developer mode, choose **Load
-unpacked**, and pick the `dist/` directory. For Firefox run `npm run
-build:firefox` and load `dist/manifest.json` through `about:debugging`.
+The same two steps apply, against the `dist/` directory the build produced.
 
 ## How it finds things
 
-Five detectors feed one list. Each covers a case the others miss, so a page
-that defeats one usually falls to another.
+Three detectors feed one list, from five sources. Each source covers a case
+the others miss, so a page that defeats one usually falls to another.
 
-| Detector | What it catches |
+| Source | Detected as | What it catches |
 | --- | --- |
-| Network | Every media response the browser receives, identified by content type and by file extension, along with the size and metadata the server reported. |
-| Document | Images, video and audio elements, `srcset` candidates, CSS background images, meta tags, download links and lazy-loaded attributes. Runs in every frame. |
-| Page hook | Media manifests and segments as the page fetches them, plus the JSON bodies of endpoints an add-on asked about. |
-| Add-ons | Site-specific JSON APIs, and sites that render their data into the page instead, mapped by data rather than code. |
-| Right-click | Whatever you point it at, unfiltered. |
+| Network | `network` | Every media response the browser receives, identified by content type and by file extension, along with the size and metadata the server reported. |
+| Document | `dom` | Images, video and audio elements, `srcset` candidates, CSS background images, meta tags, download links and lazy-loaded attributes. Runs in every frame. |
+| Page hook | `network` | Media manifests and segments as the page fetches them, plus the JSON bodies of endpoints an add-on asked about. |
+| Add-ons | `addon` | Site-specific JSON APIs, and sites that render their data into the page instead, mapped by data rather than code. |
+| Right-click | `dom` | Whatever you point it at, unfiltered. |
 
 `blob:` addresses are treated as a signal rather than an item. A blob URL is a
 pointer into memory that nothing can download, so seeing one means the player
@@ -141,6 +156,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) first. In short: `src/core/` stays pure,
 the message contract is the only place a payload shape is declared, and every
 change runs `npm run verify`.
 
-## Licence
+## License
 
 MIT. See [LICENSE](LICENSE).

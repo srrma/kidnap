@@ -43,11 +43,6 @@ against its hand-written fixture:                           2 rows
 
 The fixture has been deleted with the add-on.
 
-## What remains unverified
-
-Two fixtures behind other add-ons are still hand-written, and `coverage.mjs`
-marks both so they cannot be mistaken for evidence.
-
 ## Regenerating
 
 ```bash
@@ -66,22 +61,22 @@ Useful things to try that were not tried here:
 
 ## Provenance, and what it costs
 
-`node scripts/coverage.mjs` prints, per add-on, how many rows it produces from
+`npm run coverage` prints, per add-on, how many rows it produces from
 its fixtures and whether those fixtures were captured or written by hand:
 
 ```text
-reddit      1 rows    hand-written only
-tiktok      1 rows    hand-written only
-imgur       2 rows    hand-written only
-bsky        1 rows    hand-written only
-twitch      4 rows    hand-written only
-facebook    2 rows    hand-written only
+x                             47 rows   mixed (10)
+instagram                     30 rows   captured (2)
+tiktok                         1 row   hand-written only (1)
+imgur                          2 rows  hand-written only (1)
+behance                         6 rows  captured (2)
+pinterest                       6 rows  captured (2)
+bsky                            6 rows  captured (1)
+adobe-fonts                     3 rows  captured (1)
+adobe-fonts-collections         3 rows  captured (1)
 ```
 
-Six of ten add-ons are backed only by fixtures written to match their own
-rules. That is not evidence of anything. Instagram and X were both found
-extracting nothing from the live site while their hand-written fixtures passed;
-the remaining six deserve the same suspicion and the same treatment: capture a
-real body, cut the fixture from it, and measure.
-
-That is the work this file is asking for. It is not finished.
+Nine add-ons ship. Seven are backed by captures. TikTok and Imgur are not, and
+a hand-written fixture is not evidence either way: Instagram and X were both
+found extracting nothing from the live site while their fixtures passed. Those
+two want a real capture the same way.

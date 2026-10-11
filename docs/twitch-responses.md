@@ -6,7 +6,7 @@ This is the fourth platform found claiming support it did not have, and the
 clearest of them: the rule matched nothing Twitch serves, while a fixture
 written to match the rule made it look proven.
 
-Regenerate:
+## Regenerating
 
 ```bash
 node scripts/capture.mjs --site=twitch
@@ -73,8 +73,8 @@ rule that claimed more than it could deliver.
 
 **A fixture written to match a rule proves nothing.** `twitch-video.json` was
 built by hand, with a plausible `videoQualities` array, and the rule passed
-against it for as long as it existed. Four fixtures are like that still, and
-`node scripts/coverage.mjs` marks them so they cannot be mistaken for evidence.
+against it for as long as it existed. `npm run coverage` marks any fixture like
+that so it cannot be mistaken for evidence.
 
 **Twitch's video root has a `video` key, so the payload looks right at a
 glance.** It has metadata and no media, which is the combination most likely to

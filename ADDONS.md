@@ -3,7 +3,7 @@
 > **Writing a new one?** Start with
 > [`skills/kidnap-addon/SKILL.md`](skills/kidnap-addon/SKILL.md) rather than
 > here. This file is the format; that one is the method, and it exists because
-> four add-ons passed their tests while matching nothing at all.
+> three add-ons passed their tests while matching nothing at all.
 
 An add-on tells Kidnap where a site's API keeps its media. It is JSON, and that
 is the whole point: an add-on cannot call a function, cannot open its own
@@ -251,12 +251,10 @@ Instagram is in the same position, and for the same reason:
 [Instagram responses](docs/instagram-responses.md).
 
 [Facebook responses](docs/facebook-responses.md) and
-[Reddit responses](docs/reddit-responses.md) record two removed add-ons: both
-read endpoints that a signed-in browser never calls.
-
-[Reddit responses](docs/reddit-responses.md) is the odd one out: its feed is
-server-rendered custom elements, so its existing rules read an endpoint a
-browser never calls.
+[Reddit responses](docs/reddit-responses.md) record two removed add-ons. Both
+read endpoints a signed-in browser never calls: Facebook's feed is assembled
+after the response, and Reddit's is server-rendered custom elements rather than
+an API at all.
 
 ## What add-ons cannot do
 

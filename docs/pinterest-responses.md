@@ -5,7 +5,7 @@ What pinterest.com actually sends, recorded so nobody has to guess it again.
 Everything here is **verified**: cut from a signed-in capture, kept under
 `tests/fixtures/`, asserted by a test.
 
-Regenerate:
+## Regenerating
 
 ```bash
 SAVE=1 node scripts/capture.mjs --site=pinterest

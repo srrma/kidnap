@@ -13,7 +13,7 @@ extension has no legitimate route to.
 
 ## Decision
 
-Detect EME and licence endpoints, mark every item on the page **Protected**, and
+Detect EME and license endpoints, mark every item on the page **Protected**, and
 disable the download control with the reason shown.
 
 ## Reasoning
@@ -28,4 +28,4 @@ users out of a legal grey area they did not choose to enter.
 ## Consequence
 
 Protected content is never downloadable, even where the user has a legitimate
-licence for it. That is accepted.
+license for it. That is accepted.

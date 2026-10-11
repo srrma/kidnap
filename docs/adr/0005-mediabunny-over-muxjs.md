@@ -30,7 +30,7 @@ loss.
 
 ## Consequence
 
-mediabunny is the extension's only runtime dependency, and it is roughly
-570 KB in the offscreen chunk. It is loaded only where assembly happens and
-never enters the content script or the page hook, which stay around 11 KB and
-2 KB respectively.
+mediabunny is roughly 555 KB in the offscreen chunk. It is loaded only where
+assembly happens and never enters the content script or the page hook, which
+stay around 19 KB and 3 KB respectively. The page hook is held to a hard 8 KB
+budget, gzipped, by CI, because it is injected into every page on every site.

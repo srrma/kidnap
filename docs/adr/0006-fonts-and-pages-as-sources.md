@@ -1,6 +1,6 @@
 # Fonts are a media kind, and the page is a source
 
-Date: 2026-02-18
+Date: 2026-10-10
 
 ## Status
 
@@ -16,7 +16,7 @@ token that has to be attached.
 That forced two decisions that neither the existing add-on format nor the media
 model had an answer for.
 
-## Decisions
+## Decision
 
 **A font is a media kind, not a document.**
 
@@ -43,13 +43,13 @@ The alternative was scraping a page global from the page world. That was
 rejected for the reason it is still listed as a limitation: it needs a second
 extension point, and it breaks silently on every redesign.
 
-Sending a page is expensive, since a font catalogue is around 400 KB of
-markup, so
+Sending a page is expensive, since a font catalogue is around 400 KB of markup,
+so
 it is not sent speculatively. The content script fetches the marker list once
 and tests it against markup it already holds in memory, and posts only on a
 match.
 
-## Consequences
+## Consequence
 
 A site with no API can be supported by writing data. The cost is that markers
 are matched on exact bytes, so a fixture that is prettified will not test the

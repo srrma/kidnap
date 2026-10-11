@@ -8,7 +8,7 @@ backend, no analytics, and no remote code.
 
 ## Before you change anything
 
-1. Read `DESIGN.md`. It holds the owner's direction and two rulings on rule
+1. Read `DESIGN.md`. It holds the direction and the two rulings on rule
    collisions. Do not re-open those rulings without asking.
 2. Read `docs/adr/`. Each file records a decision and the reason for it. New
    decisions go in new ADR files, not into rewrites of old ones.
@@ -30,7 +30,7 @@ write a fixture to match a rule you are testing.
   for every cross-context payload. Never `as`-cast a payload.
 - Add-ons in `src/addons/` are pure JSON. An add-on must never be able to
   execute code. See `ADDONS.md`.
-- Comments explain behaviour, an invariant, or a non-obvious reason. Nothing
+- Comments explain behavior, an invariant, or a non-obvious reason. Nothing
   else. No comments about how this code came to be written.
 - Before proposing a commit, run `npm run verify`.
 
@@ -45,4 +45,3 @@ npm run verify   # typecheck, lint, test, build
 The working notes directory is local only. Never stage it, never name it from a
 tracked file, and never put its path in `.gitignore`. It is already excluded
 through `.git/info/exclude`, which is not committed.
-
