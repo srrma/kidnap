@@ -17,7 +17,14 @@ for (const target of ['chromium', 'firefox']) {
   mkdirSync(resolve(root, 'artifacts'), { recursive: true });
   const out = resolve(root, 'artifacts', `kidnap-${version}-${target}.zip`);
 
-  const zipped = spawnSync('zip', ['-qr', out, '.'], { cwd: resolve(root, 'dist') });
+  // Firefox's manifest declares no sandbox, so its panel never offers a
+  // font conversion and never opens the converter page. The page and the
+  // decompressor beside it are a third of the archive and are left out.
+  const exclude = target === 'firefox' ? ['-x', 'sandbox/*'] : [];
+
+  const zipped = spawnSync('zip', ['-qr', out, '.', ...exclude], {
+    cwd: resolve(root, 'dist'),
+  });
   if (zipped.status !== 0) {
     console.error('zip failed. Install the zip command, or archive dist/ by hand.');
     process.exit(zipped.status ?? 1);
