@@ -211,6 +211,12 @@ try {
   const tabIdOfPage = await worker.evaluate(
     async () => (await chrome.tabs.query({ url: ['https://x.com/*'] }))[0]?.id,
   );
+  /*
+   * Printed because an empty panel and a tab that was never found look the same
+   * from here: both report zero rows. The panel falls back to whatever tab is
+   * active when the id is missing, which after newPage() is the panel's own.
+   */
+  console.log(`note: panel pointed at tab ${tabIdOfPage ?? 'NONE'}`);
 
   await panel.goto(`chrome-extension://${extensionId}/panel/index.html?tabId=${tabIdOfPage}`, {
     waitUntil: 'domcontentloaded',
@@ -218,7 +224,18 @@ try {
   await panel.waitForTimeout(2500);
 
   const rows = await panel.locator('.row').count();
-  check('panel rendered rows', rows > 0, `${rows} rows`);
+  /* The detail line carries the actual error, which is the only thing that
+     distinguishes a rejected request from an empty tab. */
+  const panelState = await panel
+    .locator('.state')
+    .first()
+    .textContent()
+    .catch(() => null);
+  check(
+    'panel rendered rows',
+    rows > 0,
+    `${rows} rows${panelState ? `, showing "${panelState.trim().slice(0, 120)}"` : ''}`,
+  );
 
   const heading = await panel
     .locator('.count')

@@ -73,14 +73,6 @@ export interface Messages {
   };
 }
 
-/*
- * Declared as a value as well as a type, so an incoming message name can be
- * checked against the set this build actually ships.
- */
-export const Messages = {} as unknown as {
-  readonly [K in MessageName]: unknown;
-};
-
 export type MessageName = keyof Messages;
 
 interface Envelope<K extends MessageName> {
@@ -90,20 +82,26 @@ interface Envelope<K extends MessageName> {
 
 let listenerInstalled = false;
 
-const names: ReadonlySet<string> = new Set(Object.keys(Messages));
-
 /**
  * Narrows an incoming message rather than asserting it.
  *
  * A message from another extension context is `unknown` until it is checked.
- * The name has to be one this build declared, and the payload has to be an
- * object, or the message did not come from this contract and is dropped.
+ * The payload has to be an object, or the message did not come from this
+ * contract and is dropped. The name needs no check of its own: the handler
+ * table below is the declaration of what this build answers, and an unknown
+ * name finds nothing there.
  */
 function isEnvelope(raw: unknown): raw is { to: MessageName; payload: unknown } {
   if (typeof raw !== 'object' || raw === null) return false;
   const { to, payload } = raw as { to?: unknown; payload?: unknown };
+  /*
+   * A message declared `req: void` travels with no payload at all, so absent is
+   * as valid as an object. Requiring an object here silently dropped every such
+   * message, which took the panel's settings with it.
+   */
   return (
-    typeof to === 'string' && names.has(to) && typeof payload === 'object' && payload !== null
+    typeof to === 'string' &&
+    (payload === undefined || (typeof payload === 'object' && payload !== null))
   );
 }
 

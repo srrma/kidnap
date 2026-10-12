@@ -98,7 +98,7 @@ async function boot(): Promise<void> {
   }
 }
 
-async function refresh(): Promise<void> {
+async function read(): Promise<void> {
   if (state.tabId === null) return;
   try {
     const { items } = await request('media:list', { tabId: state.tabId });
@@ -110,6 +110,35 @@ async function refresh(): Promise<void> {
   }
   state.loading = false;
   render();
+}
+
+/**
+ * One read at a time.
+ *
+ * Storage changes arrive faster than the background can answer while a page is
+ * loading media, and letting reads overlap meant two things went wrong at once:
+ * the background was asked the same question repeatedly, and a read that had
+ * already been superseded could fail last and leave an error over rows that
+ * were on screen and correct. A change that lands mid-read is honoured by
+ * reading again once.
+ */
+let reading: Promise<void> | null = null;
+let again = false;
+
+function refresh(): Promise<void> {
+  if (reading) {
+    again = true;
+    return reading;
+  }
+  reading = (async () => {
+    do {
+      again = false;
+      await read();
+    } while (again);
+  })().finally(() => {
+    reading = null;
+  });
+  return reading;
 }
 
 /** The background owns the store, so storage changes drive the refresh. */
