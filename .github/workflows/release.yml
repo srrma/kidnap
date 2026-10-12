@@ -54,7 +54,7 @@ jobs:
       # who built it, so it is published beside an attestation rather than
       # instead of one.
       - name: Checksum the archives
-        run: shasum -a 256 artifacts/*.zip > artifacts/SHA256SUMS
+        run: cd artifacts && shasum -a 256 *.zip > SHA256SUMS
 
       # Signed by GitHub's Sigstore instance, binding each archive to this
       # commit and this workflow run. A verifier needs no trust in this

@@ -26,8 +26,11 @@ name or the download count. Each archive on the
 [releases page](https://github.com/srrma/kidnap/releases) is accompanied by two
 things that let you check it.
 
-**`SHA256SUMS`** confirms the download arrived intact and matches the other
-copy.
+**`SHA256SUMS`** confirms the download arrived intact:
+
+```bash
+shasum -a 256 -c SHA256SUMS
+```
 
 **An attestation** confirms where it came from. It is signed by GitHub through
 Sigstore and recorded in a public transparency log, and it names the commit and
