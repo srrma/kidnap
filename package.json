@@ -36,5 +36,21 @@
     "typescript": "^5.9.0",
     "vite": "^7.0.0",
     "vitest": "^4.1.10"
-  }
+  },
+  "files": [
+    "dist",
+    "icons",
+    "manifest.json",
+    "manifest.firefox.json",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "ADDONS.md",
+    "CONTRIBUTING.md",
+    "LIMITATIONS.md",
+    "DESIGN.md",
+    "skills",
+    "docs"
+  ]
 }
