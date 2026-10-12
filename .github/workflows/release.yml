@@ -6,6 +6,10 @@ on:
 
 permissions:
   contents: write
+  # Attestation mints a Sigstore identity for the run, which needs an OIDC
+  # token, and records the result against the repository.
+  id-token: write
+  attestations: write
 
 jobs:
   release:
