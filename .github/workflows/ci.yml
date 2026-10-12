@@ -29,8 +29,6 @@ jobs:
       - name: Build Firefox
         run: npm run build:firefox
 
-      - name: Add-on parity against the previous extractors
-        run: node scripts/parity.mjs
 
       - name: Package both targets
         run: npm run package

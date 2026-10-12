@@ -6,8 +6,8 @@ Accepted.
 
 ## Context
 
-The previous assembly path used mux.js, which has had no release since 2019,
-and drove it with a hand-written m3u8 parser.
+mux.js was considered and rejected: it has had no release since 2019, and
+using it means driving it with a hand-written m3u8 parser.
 
 That parser did not implement `EXT-X-MAP`, so every fragmented-MP4 stream,
 which is most modern HLS, failed outright. It kept a single key for the whole

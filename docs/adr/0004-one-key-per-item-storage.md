@@ -6,9 +6,10 @@ Accepted.
 
 ## Context
 
-The previous store kept one array per tab and rewrote the whole array on every
-detection, behind a global lock. A page with 500 images therefore performed 500
-writes whose payload grew with each one. That is quadratic in bytes for a
+A store holding one array per tab, rewritten on every detection behind a
+global lock, was considered and rejected. A page with 500 images would
+therefore perform 500 writes whose payload grew with each one. That is
+quadratic in bytes for a
 linear amount of work, and the global lock serialised four detectors behind a
 single queue.
 

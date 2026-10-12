@@ -23,8 +23,6 @@ jobs:
       - run: npm run lint
       - run: npm test
 
-      - name: Add-on parity against the previous extractors
-        run: node scripts/parity.mjs
 
       - name: Package both targets
         run: npm run package

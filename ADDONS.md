@@ -226,8 +226,9 @@ works on a tweet opened directly and finds nothing while scrolling a timeline.
    `tests/fixtures/`.
 3. Add a test that extracts from it and asserts the fields you care about,
    including that variants share a `group`.
-4. Run `npm run verify`. `scripts/parity.mjs` compares what the previous
-   extractors emitted against what the add-ons emit now and fails on a gap.
+4. Run `npm run verify`. `node scripts/coverage.mjs` prints, per add-on, how
+   many rows its fixtures produce and whether each fixture was cut from a
+   capture or written by hand.
 
 The fixture is the point. Platform APIs change without warning, and a fixture
 turns that silent breakage into a failing test.

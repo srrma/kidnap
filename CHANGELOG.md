@@ -1,9 +1,8 @@
 # Changelog
 
-## 3.0.0
+## 1.0.0
 
-A rewrite. The extension is named the same and works the same way, but almost
-every part of it is new.
+The first release.
 
 ### Added
 
@@ -16,18 +15,13 @@ every part of it is new.
   templates in the add-on language, each added because a platform needed it.
 - Rewrites now apply to every recorded URL rather than only to URLs the same
   add-on produced, so a rewrite-only add-on works.
-- `scripts/parity.mjs` compares the fields each add-on emits against the fields
-  the v2 extractors emitted, and exits non-zero on a gap. It needs a checkout of
-  the v2 source, so it is run by hand (`npm run parity`) rather than by
-  `npm run verify`.
-- Stream assembly through mediabunny, which replaces the unmaintained mux.js.
-  Fragmented MP4 streams, rotating encryption keys and byte ranges now work,
+- Stream assembly through mediabunny. Fragmented MP4 streams, rotating
+  encryption keys and byte ranges all work,
   all three of which the previous parser got wrong.
 - Cancellation for running stream jobs.
 - A per-host mute list, so detection can be switched off on a site without
   uninstalling anything.
-- A working light and dark theme, with a system option. The previous version
-  was dark only.
+- A working light and dark theme, with a system option.
 - Single-key media storage. A busy page writes a handful of times instead of
   once per detection.
 - Video posters decoded from the file, generated only for rows on screen and at

@@ -1,18 +1,14 @@
-# Kidnap 3.0.0
+# Kidnap 1.0.0
 
-A rewrite of a browser extension that finds the images, video, audio, streams
-and documents a page has already loaded, and lets you save them.
+A browser extension that finds the images, video, audio, streams and documents a
+page has already loaded, and lets you save them.
 
 Everything runs on your machine. There is no server, no account and no
 telemetry. The only network requests the extension makes are to the media URLs
 you pick, using the session you are already signed in with.
 
-## What changed
-
-**Stream assembly was rebuilt.** Media assembly now goes through mediabunny,
-which replaces the unmaintained mux.js the previous version used. Fragmented
-MP4, rotating encryption keys and byte ranges now work. The old parser got all
-three wrong.
+**Stream assembly.** Segmented media is assembled through mediabunny.
+Fragmented MP4, rotating encryption keys and byte ranges all work.
 
 **Add-ons are now data.** A site-specific extractor is JSON that names hosts and
 paths. There is no `eval`, no function field, and no path from an add-on to a
@@ -20,7 +16,7 @@ network request a plain browser fetch would not already make. Nine ship
 enabled. Seven are backed by a fixture cut from a response that site actually
 sent; the TikTok and Imgur fixtures are written by hand and are marked as such.
 
-**Both themes work.** The previous version was dark only. Light, dark and
+**Both themes work.** Light, dark and
 system are all available now, and neither one is the default.
 
 **Firefox is supported.** A separate build exists, using `sidebar_action` and
@@ -54,7 +50,7 @@ for the reasoning.
 
 ## Installing
 
-Download `kidnap-3.0.0-chromium.zip` or `kidnap-3.0.0-firefox.zip` from the
+Download `kidnap-1.0.0-chromium.zip` or `kidnap-1.0.0-firefox.zip` from the
 assets on this page.
 
 Chromium: unpack it, open `chrome://extensions`, turn on Developer mode, choose

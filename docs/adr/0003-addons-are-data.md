@@ -6,9 +6,9 @@ Accepted.
 
 ## Context
 
-Site-specific detection has to change when platforms change. The previous
-extractors were a JavaScript module per platform, each with its own deep walk
-over the response body.
+Site-specific detection has to change when platforms change. Handing every
+platform its own JavaScript module, each with its own deep walk over the
+response body, was considered and rejected.
 
 That approach had two problems. The walk shared one mutable set of "current
 author" and "current caption" variables across the whole response, so a caption

@@ -1,6 +1,6 @@
 {
   "name": "kidnap",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Detect, preview and download media from any page. Runs entirely on your machine.",
   "license": "MIT",
   "private": true,
@@ -15,7 +15,6 @@
     "icons": "node scripts/make-icons.mjs",
     "package": "node scripts/package.mjs",
     "coverage": "node --experimental-strip-types scripts/coverage.mjs",
-    "parity": "node scripts/parity.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
