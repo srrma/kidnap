@@ -8,8 +8,10 @@ every part of it is new.
 ### Added
 
 - A declarative add-on system. Add-ons are JSON, validated on the way in, and
-  cannot execute code. Nine built-ins ship, each backed by a captured response
-  fixture.
+  cannot execute code. Nine built-ins ship. Seven are backed by a fixture cut
+  from a captured response; the TikTok and Imgur fixtures are written by hand
+  and are marked as such by `scripts/coverage.mjs`, which prints the provenance
+  of every fixture.
 - `when` conditions, fixed values, last-path-segment reads and permalink
   templates in the add-on language, each added because a platform needed it.
 - Rewrites now apply to every recorded URL rather than only to URLs the same

@@ -8,8 +8,8 @@ backend, no analytics, and no remote code.
 
 ## Before you change anything
 
-1. Read `DESIGN.md`. It holds the direction and the two rulings on rule
-   collisions. Do not re-open those rulings without asking.
+1. Read `DESIGN.md`. It holds the direction, and where expression is and is not
+   allowed, with the reasoning for each. Do not re-open those without asking.
 2. Read `docs/adr/`. Each file records a decision and the reason for it. New
    decisions go in new ADR files, not into rewrites of old ones.
 3. Read `LIMITATIONS.md` before touching stream assembly or DRM handling. Both

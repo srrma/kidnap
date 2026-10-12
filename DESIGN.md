@@ -1,61 +1,87 @@
 # Design direction
 
+The visual and structural direction for Kidnap, and the reasoning behind it. A
+contributor should be able to read this and make a decision that fits without
+having to ask why anything is the way it is.
+
 ## Direction
 
-> A frankenstein of Apple HIG and Material 3 Expressive.
+A browser side panel that one person uses repeatedly to save media. It borrows
+its structure from Apple HIG — sheets, grouped lists, system typography,
+restrained colour — and its expression from Material 3 Expressive: confident
+colour, shape used for meaning, tonal surfaces.
 
-## Reading
+The two are in tension on purpose. Material 3 Expressive wants very large corner
+radii and pill shapes nearly everywhere; a tool you open twenty times a day does
+not. The resolution is that shape is spent where it carries meaning and withheld
+where it would only decorate.
 
-A browser side-panel utility, used repeatedly by one person to save media, in a
-structural language borrowed from Apple HIG (sheets, grouped lists, system
-typography, restrained color) fused with Material 3 Expressive (expressive
-color, shape emphasis, tonal surfaces).
+## Where the expression is allowed
 
-**Dials: ENERGY 2 / RHYTHM 2 / MOTION 1.**
+Large radii and pill shapes appear on: type filter tabs, media-kind badges,
+primary buttons, and the sheet grabber.
 
-Energy 2 because M3 Expressive contributes genuine boldness and the product has
-a clear accent moment (the primary action on a row). Not Energy 3: this is a
-tool someone uses many times a day, and shouting at it would be a defect.
+Every one of those is a control or a category. Pills on list rows, cards, inputs
+or thumbnails would say nothing, so they use restrained radii instead. No
+decorative pill, and never a pill carrying a word the surface already says.
 
-Rhythm 2 because the panel is not one repeated unit. The list, the queue, the
-sheet, and the empty state each compose differently, and the type filter bar
-deliberately breaks the list's grid.
+## Where the blur is allowed
 
-Motion 1 because hover, focus, and state transitions are all a repeated tool
-needs. Nothing loops, nothing pulses, nothing enters on scroll. A panel that
-animates at you while you are trying to read a list of URLs is wrong.
+One surface: the sheet scrim. That is what a sheet does, and blurring it separates
+the sheet from the list without moving anything.
 
-## Two collisions, and how they were settled
+Every other surface is opaque. Blur on every surface flattens the hierarchy
+instead of creating it.
 
-**R-11 (no pill-shaped everything) and R-09 (capsule badges): kept, applied
-with limits.** M3 Expressive's signature is very large corner radii and pill
-chips. Those are used on the components where the shape carries meaning: type
-filter tabs, media-kind badges, primary buttons, and the sheet grabber. List
-rows, cards, inputs, and thumbnails use restrained radii. No decorative pills,
-and no pill ever carries a word the surface already says.
+## Colour and theme
 
-**R-10 (glassmorphism): sheets only.** The sheet scrim is the single blurred
-surface, which is what an Apple HIG sheet already does. Every other surface is
-opaque and tonal.
+Both themes are first class. A tool with no strong reason to force a theme ships
+a working toggle rather than a preference. Dark mode is not the default.
 
-## Consequences that follow from the direction
+There is exactly one accent, used on the primary action of a row. One accent is
+what makes it an accent; spreading it across badges, borders and icons removes
+the focal point.
 
-- Both themes are first class. A tool with no strong reason to force one theme
-  ships a working toggle (R-21). Dark mode is not the default.
-- Every data view needs an empty state, a loading state, and an error state,
-  and each one names the cause and the next action (R-27).
-- Contrast is checked in both themes before delivery, against the rows, the
-  queue, the sheet and the empty states (R-25).
+## States
 
-## Reason for every major decision
+Every data view needs an empty state, a loading state and an error state. Each
+one names the cause and the next action, rather than showing a generic apology.
+A state that says what happened and what to do about it is worth more than a
+state that is merely attractive.
 
-Recorded as R-31 requires.
+Contrast is checked in both themes before delivery, against the rows, the queue,
+the sheet and the empty states. A side panel is small and often sits next to
+other windows, so it has to hold up at a glance.
+
+## Rhythm
+
+The panel is not one repeated unit. The list, the queue, the sheet and the empty
+state each compose differently.
+
+The type filter bar is the deliberate break in the list's grid. It reads as a
+strip of controls rather than as more content, which is what tells you it can be
+used to filter and not just read.
+
+## Motion
+
+Hover, focus and state transitions are a repeated tool's worth of motion, and
+that is the limit. Nothing loops, nothing pulses, nothing enters on scroll. A
+panel that animates at you while you are trying to read a list of URLs is wrong
+however good the animation looks in isolation.
+
+## Decisions and their reasons
 
 | Decision | Reason |
 | --- | --- |
-| Sheets for preview, settings, and variant choice | The panel is narrow; a sheet keeps the list behind it, which is Apple HIG structure and matches the direction above. |
-| One accent, used on the primary row action | One accent is what makes it an accent. Spreading it across badges, borders, and icons removes the focal point. |
-| Opaque tonal surfaces everywhere except the sheet | Keeps hierarchy legible; blur on every surface flattens it (R-10). |
-| Large radii on tabs, badges, and primary buttons only | Carries M3 Expressive character where shape signals an action or a category, not on every element (R-11). |
-| System font stack | A side panel inherits the user's system font by default and looks native for free. Choosing a display face here would fight the browser chrome. |
-| Filter bar is pills, list rows are not | Gives the RHYTHM 2 break: the control strip reads as controls, the list reads as content. |
+| Sheets for preview, settings, and variant choice | The panel is narrow; a sheet keeps the list behind it, which is how Apple HIG handles a detail view over a list. |
+| One accent, used on the primary row action | One accent is what makes it an accent. Spreading it across badges, borders and icons removes the focal point. |
+| Opaque tonal surfaces everywhere except the sheet | Keeps hierarchy legible; blur on every surface flattens it. |
+| Large radii on tabs, badges and primary buttons only | Carries Material 3 Expressive character where shape signals an action or a category, rather than on every element. |
+| System font stack | A side panel inherits the user's system font by default and looks native for free. A display face would fight the browser chrome. |
+| Filter bar is pills, list rows are not | The control strip reads as controls and the list reads as content. |
+| Both themes ship with a toggle | Nothing about this product justifies forcing one. |
+| System font, no display face | As above. |
+
+Further decisions, each with its context and its alternatives, are in
+[`docs/adr/`](adr/). New decisions go in new files rather than as rewrites of
+old ones.
