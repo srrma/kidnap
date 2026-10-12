@@ -296,9 +296,9 @@ try {
     const opener = [...document.querySelectorAll('.row-open')].find((r) =>
       r.textContent?.includes('FONT'),
     );
-    if (!opener) return { error: 'no font row' };
+    if (!opener) return { error: 'no font row', clicked: false };
     opener.click();
-    return { clicked: true };
+    return { error: null, clicked: true };
   });
   await fontPanel.waitForTimeout(6000);
   const specimenState = await fontPanel.evaluate(() => {
@@ -311,7 +311,9 @@ try {
   });
   check(
     'a font previews as a specimen in its own face',
-    specimenState.lines > 0 && specimenState.loaded.some((f) => f.endsWith(':loaded')),
+    specimen.clicked === true &&
+      specimenState.lines > 0 &&
+      specimenState.loaded.some((f) => f.endsWith(':loaded')),
     `${specimenState.lines} lines, ${specimenState.loaded.join(', ').slice(0, 50)}`,
   );
   await fontPanel.keyboard.press('Escape');
