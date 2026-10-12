@@ -46,8 +46,25 @@ jobs:
             exit 1
           fi
 
+      # A checksum says the download arrived intact. It says nothing about
+      # who built it, so it is published beside an attestation rather than
+      # instead of one.
+      - name: Checksum the archives
+        run: shasum -a 256 artifacts/*.zip > artifacts/SHA256SUMS
+
+      # Signed by GitHub's Sigstore instance, binding each archive to this
+      # commit and this workflow run. A verifier needs no trust in this
+      # repository's owner: the attestation is checked against GitHub's
+      # public transparency log.
+      - name: Attest where the archives came from
+        uses: actions/attest-build-provenance@v2
+        id: attest
+        with:
+          subject-path: artifacts/*.zip
+
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/*.zip
+            artifacts/SHA256SUMS
           body_path: docs/release-notes-${{ env.VERSION }}.md

@@ -11,20 +11,39 @@ MIT licensed.
 
 ## Install it
 
-Grab the zip for your browser from the
-[releases page](https://github.com/srrma/kidnap/releases).
+The reliable way to install Kidnap is through the Chrome Web Store or
+addons.mozilla.org. A store signs what it serves, which is the part a user
+cannot check for themselves.
 
-**Chromium.** Open `chrome://extensions`, turn on Developer mode, choose **Load
-unpacked**, and select the folder you unzipped.
+Building from the source in this repository produces the same extension. It is
+the way to read the code before running it, and it is what anyone reviewing
+this repository should do.
 
-**Firefox.** Unzip the file, open `about:debugging#/runtime/this-firefox`, choose
-**Load Temporary Add-on**, and pick `manifest.json` inside the folder. A
-temporary add-on is removed when Firefox closes. For something permanent it has
-to go through addons.mozilla.org.
+## Check what you were given
 
-Unsigned extensions only install this way, and only in Developer mode, so you
-will see a warning that a store build would not produce. The code is the same
-either way.
+If you download a release archive rather than building, do not trust the file
+name or the download count. Each archive on the
+[releases page](https://github.com/srrma/kidnap/releases) is accompanied by two
+things that let you check it.
+
+**`SHA256SUMS`** confirms the download arrived intact and matches the other
+copy.
+
+**An attestation** confirms where it came from. It is signed by GitHub through
+Sigstore and recorded in a public transparency log, and it names the commit and
+the workflow run that produced the file. Verifying it needs no trust in the
+person who published the release:
+
+```bash
+gh attestation verify kidnap-1.0.0-chromium.zip --repo srrma/kidnap
+```
+
+The command prints the identity that signed it and the source commit. If the
+archive was built anywhere but a GitHub Actions run of this repository, at a
+commit that is not the tag, it fails.
+
+Nothing here is a substitute for reading the code. The archives are the same
+bytes as the source, and the source is short enough to read.
 
 ## Install it from source
 
@@ -33,7 +52,18 @@ npm install
 npm run build
 ```
 
-The same two steps apply, against the `dist/` directory the build produced.
+The build writes to `dist/`. Load that directory as an unpacked extension:
+
+**Chromium.** Open `chrome://extensions`, turn on Developer mode, choose **Load
+unpacked**, and select `dist/`.
+
+**Firefox.** Open `about:debugging#/runtime/this-firefox`, choose **Load
+Temporary Add-on**, and pick `dist/manifest.json`. A temporary add-on is removed
+when Firefox closes; for something permanent it has to go through
+addons.mozilla.org.
+
+Both show a warning that a store build would not, because both are running an
+unsigned extension. That warning is accurate.
 
 ## How it finds things
 
