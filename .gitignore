@@ -5,6 +5,9 @@ node_modules/
 dist/
 artifacts/
 coverage/
+# Response captures from scripts/capture.mjs. These come from signed-in
+# sessions and can contain anything the account can see, so they stay out.
+captures/
 *.tsbuildinfo
 
 # Packaging
