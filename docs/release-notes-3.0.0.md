@@ -16,8 +16,9 @@ three wrong.
 
 **Add-ons are now data.** A site-specific extractor is JSON that names hosts and
 paths. There is no `eval`, no function field, and no path from an add-on to a
-network request a plain browser fetch would not already make. Eight ship
-enabled, each backed by a fixture cut from a response that site actually sent.
+network request a plain browser fetch would not already make. Nine ship
+enabled. Seven are backed by a fixture cut from a response that site actually
+sent; the TikTok and Imgur fixtures are written by hand and are marked as such.
 
 **Both themes work.** The previous version was dark only. Light, dark and
 system are all available now, and neither one is the default.
