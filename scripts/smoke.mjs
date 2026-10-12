@@ -24,7 +24,13 @@ const args = process.argv.slice(2);
 const flag = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
 const keep = args.includes('--keep');
 const target = flag('url') ?? 'https://x.com/search?q=news&f=live';
-const cookieFile = flag('cookies') ?? resolve(process.env.HOME, 'Downloads/x.com_cookies.txt');
+/*
+ * The per-site cookie files were replaced by one shared jar, which is what
+ * capture.mjs reads too. A specific file can still be given with --cookies.
+ */
+const cookieFile =
+  flag('cookies') ?? process.env.COOKIES ?? resolve(process.env.HOME, 'Downloads/cookies.txt');
+const COOKIE_HOST = 'x.com';
 
 /** Never print a full URL, which can carry a session token. */
 function redact(url) {
@@ -117,8 +123,18 @@ try {
 
   const extensionId = new URL(worker.url()).host;
 
-  const cookies = readCookies(cookieFile);
-  check('cookies parsed', cookies.length > 0, `${cookies.length} cookies for x.com`);
+  /*
+   * Filtered to the site under test: the shared jar holds two hundred domains,
+   * and handing them all to the browser is both pointless and slow.
+   */
+  const cookies = readCookies(cookieFile).filter(
+    (c) => c.domain.replace(/^\./, '') === COOKIE_HOST || c.domain.endsWith('.' + COOKIE_HOST),
+  );
+  check(
+    'cookies parsed',
+    cookies.length > 0,
+    `${cookies.length} cookies for ${COOKIE_HOST} from ${cookieFile.split('/').pop()}`,
+  );
   await context.addCookies(cookies);
 
   /* Settle on the target page and give detection time to run. */
