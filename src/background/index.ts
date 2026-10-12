@@ -52,15 +52,13 @@ onChange((next) => {
   }
 });
 
-/* ── Detection ───────────────────────────────────────────────────────────── */
-
 async function record(tabId: number, report: Report): Promise<boolean> {
   let item: MediaItem | null;
   try {
     item = build(report, tabId, settings, Date.now(), (url) => addons.rewrite(url));
   } catch {
-    /* A throw here loses the item silently, which is how the font path went
-       missing for a while. Counted rather than swallowed. */
+    /* A throw here loses the item with nothing to show for it, so it is
+       counted rather than swallowed. */
     diag.rejected += 1;
     return false;
   }
@@ -225,8 +223,6 @@ async function markProtected(tabId: number): Promise<void> {
   }
 }
 
-/* ── Requests from the UI ────────────────────────────────────────────────── */
-
 on('media:list', async ({ tabId }) => ({ items: await store.list(tabId) }));
 on('media:clear', async ({ tabId }) => {
   await store.clear(tabId);
@@ -245,8 +241,6 @@ on('addons:list', () => ({
   }),
 }));
 on('jobs:get', async ({ tabId }) => store.jobs(tabId));
-
-/* ── Tab lifecycle ───────────────────────────────────────────────────────── */
 
 api.tabs.onRemoved.addListener((tabId) => {
   void store.clear(tabId);

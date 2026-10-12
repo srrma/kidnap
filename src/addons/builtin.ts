@@ -1,10 +1,12 @@
 /**
  * The add-ons that ship enabled. All of them are data.
  *
- * Every path here was written against a captured response rather than guessed,
- * and every one is covered by a fixture in tests/fixtures. When a platform
+ * Every path here is written against a captured response rather than guessed,
+ * and each rule is covered by a fixture in tests/fixtures. When a platform
  * changes shape the fixture is what breaks, which is the point: a silent
- * breakage becomes a red test.
+ * breakage becomes a red test. `scripts/coverage.mjs` prints, per add-on, how
+ * many rows its fixtures produce and whether each fixture was cut from a
+ * capture or written by hand.
  *
  * Reading: `at` selects a position in the response, with `[]` fanning out over
  * an array. Every `media` path is relative to that position, and a leading `^`
@@ -23,9 +25,8 @@ import type { AddonSpec, MediaSpec, RuleSpec } from '../core/types';
 
 /*
  * X serves the same tweet objects from several endpoints, each at a different
- * depth in its response. A single rule only covers one of them, which is what
- * the first version of this add-on got wrong: it handled a tweet opened
- * directly and nothing else, so scrolling a timeline found nothing.
+ * depth in its response. A single rule only covers one of them, so a surface
+ * with no rule of its own contributes nothing however busy the page is.
  *
  * The media spec is shared and entirely relative, so it does not care how deep
  * the tweet sits. From a variant, `^` is the media object and `^^` is the tweet

@@ -25,7 +25,7 @@ let observer: MutationObserver | null = null;
  * Injected into the page's own context at document_start, where there is no
  * <head> yet and the site is still rewriting the document.
  *
- * Three things bit here and are worth writing down:
+ * Three constraints shape the injection:
  *
  * - Removing the script element right after appending it races the load. The
  *   element can go before the browser fetches it, so the hook silently never

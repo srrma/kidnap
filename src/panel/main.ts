@@ -84,8 +84,6 @@ if (!supportsSidePanel() || !api.offscreen) {
   void import('../offscreen/assemble').then((module) => module.startAssembling());
 }
 
-/* ── Boot ───────────────────────────────────────────────────────────────── */
-
 async function boot(): Promise<void> {
   state.tabId = await activeTabId();
   try {
@@ -155,8 +153,6 @@ api.tabs.onActivated.addListener(() => {
   void boot();
 });
 
-/* ── Derived view ───────────────────────────────────────────────────────── */
-
 function visible(): MediaItem[] {
   const rows = consolidate(state.raw);
   state.rows = rows;
@@ -183,8 +179,6 @@ function counts(rows: MediaItem[]): Record<Filter, number> {
   }
   return base;
 }
-
-/* ── Render ─────────────────────────────────────────────────────────────── */
 
 function render(): void {
   const items = visible();
@@ -430,8 +424,6 @@ function selectionBar(): HTMLElement {
     ),
   ]);
 }
-
-/* ── Keyed list ─────────────────────────────────────────────────────────── */
 
 function reconcile(list: HTMLElement, items: MediaItem[]): void {
   const wanted = new Set(items.map((item) => item.id));
@@ -738,8 +730,6 @@ function describeItem(item: MediaItem): string {
   return `${item.kind}, ${item.name ?? item.url}`;
 }
 
-/* ── Queue ──────────────────────────────────────────────────────────────── */
-
 function renderQueue(): HTMLElement | null {
   const active = [...state.jobs.streams, ...state.jobs.direct].filter(
     (job) => job.state !== 'done',
@@ -805,8 +795,6 @@ function stateWord(state: DirectJob['state'] | StreamJob['state']): string {
       return 'Working';
   }
 }
-
-/* ── Commands ───────────────────────────────────────────────────────────── */
 
 /**
  * Saving splits by kind on purpose. A manifest is not a file the browser can

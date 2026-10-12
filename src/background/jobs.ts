@@ -72,8 +72,6 @@ async function ensureOffscreen(): Promise<void> {
   await whenOffscreenReady();
 }
 
-/* ── Direct files ────────────────────────────────────────────────────────── */
-
 async function enqueueDirect(items: MediaItem[], settings: Settings): Promise<number> {
   const tabId = items[0]?.tabId;
   if (tabId === undefined) return 0;
@@ -143,8 +141,6 @@ api.downloads.onChanged.addListener((delta) => {
   })();
 });
 
-/* ── Streams ─────────────────────────────────────────────────────────────── */
-
 async function enqueueStream(item: MediaItem, settings: Settings): Promise<string> {
   const tabId = item.tabId;
   const kind = item.url.includes('.mpd') ? 'dash' : 'hls';
@@ -199,8 +195,6 @@ async function onAssembleFailed(id: string, error: string): Promise<void> {
   await updateStream(id, { state: 'failed', error });
 }
 
-/* ── Job bookkeeping ─────────────────────────────────────────────────────── */
-
 async function update(
   tabId: number,
   next: DirectJob | ((job: DirectJob) => DirectJob),
@@ -244,8 +238,6 @@ async function tabsWithJobs(): Promise<number[]> {
     .map((key) => Number(key.slice(2)))
     .filter((tabId) => Number.isInteger(tabId));
 }
-
-/* ── Wiring ──────────────────────────────────────────────────────────────── */
 
 export function wireJobs(): void {
   void (async () => {

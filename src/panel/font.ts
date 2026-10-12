@@ -110,8 +110,6 @@ export async function saveFontAsTtf(
   return { filename: name, bytes: ttf.length };
 }
 
-/* ── Specimen ────────────────────────────────────────────────────────────── */
-
 let serial = 0;
 
 /**

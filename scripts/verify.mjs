@@ -94,7 +94,6 @@ try {
   );
   const extensionId = new URL(worker.url()).host;
 
-  /* ── 3. A real page, real rows, no stale error over them ─────────────── */
   const page = await context.newPage();
   await context.addCookies(cookiesFor('x.com'));
   const loaded = await visit(page, 'https://x.com/home');
@@ -139,7 +138,6 @@ try {
     rendered.errors.join(' | ').slice(0, 90),
   );
 
-  /* ── 4. Read coalescing under churn: rows must not go stale ─────────── */
   await page.mouse.wheel(0, 2000);
   await page.waitForTimeout(5000);
   const afterChurn = await panel.evaluate(() => ({
@@ -152,7 +150,6 @@ try {
     `${rendered.rows} -> ${afterChurn.rows} rows, ${afterChurn.errors} errors`,
   );
 
-  /* ── 5. A filter still narrows the list ──────────────────────────────── */
   const filtered = await panel.evaluate(() => {
     const before = document.querySelectorAll('.row').length;
     const chip = [...document.querySelectorAll('button')].find((b) =>
@@ -170,7 +167,6 @@ try {
     `${filtered.before} -> ${filtered.after} rows`,
   );
 
-  /* ── 6. Preview opens and closes ─────────────────────────────────────── */
   const preview = await panel.evaluate(() => {
     const opener = document.querySelector('.row-open');
     if (!opener) return { error: 'no row to open' };
@@ -192,7 +188,6 @@ try {
   const closed = await panel.evaluate(() => Boolean(document.querySelector('.sheet')));
   check('Escape closes it', closed === false);
 
-  /* ── 7. The envelope fix, from the context that really sends ────────── */
   /*
    * Sent from the panel rather than the worker: a service worker does not
    * receive its own runtime messages, so asking it whether it can hear itself
@@ -234,7 +229,6 @@ try {
     `sort: ${roundTrip.before} -> ${roundTrip.after}`,
   );
 
-  /* ── 8. Settings UI opens, which is the path the envelope bug broke ──── */
   const settingsUi = await panel.evaluate(() => {
     const button = [...document.querySelectorAll('button')].find((b) =>
       /settings|⚙/i.test((b.getAttribute('aria-label') ?? '') + (b.textContent ?? '')),
@@ -255,7 +249,6 @@ try {
     settingsUi.clicked === true && settingsState.open && settingsState.inputs > 0,
     `${settingsState.inputs} controls`,
   );
-  /* ── 9. A second site, and the one path X cannot exercise ───────────── */
   /*
    * Adobe Fonts is server-rendered: the add-on reads JSON out of the page's own
    * markup, which is a different code path from an intercepted response. If the
