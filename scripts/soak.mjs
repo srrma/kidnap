@@ -146,6 +146,14 @@ async function main() {
 
     const first = await panel.evaluate(() => document.querySelectorAll('.row').length);
     process.stdout.write(`  items: ${first}\n`);
+
+    /* Why an add-on did or did not speak, which the row count cannot say. */
+    const diag = await worker.evaluate(() => globalThis.__kidnapDiag ?? null);
+    if (diag) {
+      process.stdout.write(
+        `  api bodies: ${diag.apiBody}  unclaimed: ${diag.notClaimed}  bad json: ${diag.badJson}  from add-ons: ${diag.items}`,
+      );
+    }
     record(scenario.id, 'detects media', first > 0, `${first} rows`);
 
     /* A post page holds one piece of content; losing it is the worst outcome. */
