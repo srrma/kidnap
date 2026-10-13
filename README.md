@@ -4,8 +4,18 @@ A browser extension that finds the images, video, audio, streams and documents
 a page has already loaded, and lets you save them.
 
 Everything runs on your machine. There is no server, no account and no
-telemetry. The only network requests the extension makes are to the media URLs
-you choose, using the session you are already signed in with.
+telemetry. Nothing is sent anywhere except to the pages you are already on and
+the media URLs you ask for.
+
+One request happens without you asking for it. A video row that is on screen
+plays a fraction of a second of the file to draw its picture, so the row can
+show you what it found. It goes to the site you are already looking at, for a
+file that page had already requested in order to play, and it is how a row
+shows a picture instead of a file name.
+
+Everything else waits for you. Saving a file is a request, and converting a
+web font to TrueType fetches the font once more, but only when you press the
+button.
 
 MIT licensed.
 

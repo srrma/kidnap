@@ -7,8 +7,8 @@ having to ask why anything is the way it is.
 ## Direction
 
 A browser side panel that one person uses repeatedly to save media. It borrows
-its structure from Apple HIG — sheets, grouped lists, system typography,
-restrained colour — and its expression from Material 3 Expressive: confident
+its structure from Apple HIG (sheets, grouped lists, system typography,
+restrained colour) and its expression from Material 3 Expressive: confident
 colour, shape used for meaning, tonal surfaces.
 
 The two are in tension on purpose. Material 3 Expressive wants very large corner
@@ -81,6 +81,8 @@ however good the animation looks in isolation.
 | Filter bar is pills, list rows are not | The control strip reads as controls and the list reads as content. |
 | Both themes ship with a toggle | Nothing about this product justifies forcing one. |
 | System font, no display face | As above. |
+| Character glyphs for the picker and export, no icon font | An icon library would add a dependency to draw three marks. The picker is a circled dot (`◎` armed, `○` idle) because it is a pointer, and export is a brace pair (`{}`) because the output is JSON. Both carry an `aria-label` and a tooltip, so the shape is the fast path rather than the only one. |
+| Minimum 44px on anything clickable | A target smaller than a fingertip is a target that misses. Rows stay dense, but every control is a comfortable size. |
 
 Further decisions, each with its context and its alternatives, are in
 [`docs/adr/`](adr/). New decisions go in new files rather than as rewrites of

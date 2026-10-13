@@ -16,6 +16,12 @@ network request a plain browser fetch would not already make. Nine ship
 enabled. Seven are backed by a fixture cut from a response that site actually
 sent; the TikTok and Imgur fixtures are written by hand and are marked as such.
 
+A fixture proves the rules read a captured response. It does not prove the site
+still sends that shape, and this release should be read with that in mind: the
+detectors catch media on every site listed here, but the add-on layer is only
+confirmed against live traffic on X. The rest are captured but unverified, and
+`LIMITATIONS.md` says so.
+
 **Both themes work.** Light, dark and
 system are all available now, and neither one is the default.
 

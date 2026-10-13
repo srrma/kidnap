@@ -130,6 +130,11 @@ const diag = {
   rejected: 0,
   stored: 0,
 };
+/*
+ * Published on the worker so a real browser session can be inspected without a
+ * rebuild: scripts/soak.mjs reads it to report why an add-on stayed quiet on a
+ * live site. Counters only, no media and no URLs.
+ */
 (globalThis as unknown as { __kidnapDiag: typeof diag }).__kidnapDiag = diag;
 
 function tabIdOf(sender: chrome.runtime.MessageSender): number | undefined {

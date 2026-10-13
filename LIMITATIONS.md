@@ -108,6 +108,15 @@ ends. Two things this version still does not attempt:
 Both are the kind of thing that works until it does not. They are documented as
 missing rather than shipped and quietly broken.
 
+**A fixture is not proof against a live site.** Every add-on is checked against
+a captured response, and a passing fixture proves only that the rules read the
+shape that was captured. Driving the built extension against signed-in pages
+shows the gap: of the nine add-ons, only X extracts anything from live traffic
+today. The others match their declared endpoints and return nothing, which
+means either the site moved or the capture is not the response the add-on
+actually needs. Until each is re-checked against traffic, treat the detectors as
+the working part and the add-ons as unverified.
+
 ## Fonts on Firefox
 
 A web font can be saved exactly as the server sent it everywhere, which is what

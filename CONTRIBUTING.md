@@ -11,6 +11,30 @@ npm run verify
 crashes resolving vitest 4's optional peer graph, and the flag avoids it. Remove
 it once that is fixed upstream.
 
+## Running it against real sites
+
+`npm run verify` proves the rules are right. It cannot tell you whether a site
+still sends the shape an add-on expects, which is a different question. Two
+commands drive a real browser for that:
+
+```bash
+npm run smoke   # one page, extension loaded, list and settings checked
+npm run soak    # eleven pages across nine hosts, signed in from ~/Downloads/cookies.txt
+```
+
+`soak` reports, per site, how many items were found, whether the picker lights a
+row, whether permalinks resolve, whether the export carries a token, and how
+many API bodies each add-on claimed and how many items it extracted from them.
+That last pair is the one that catches a rule matching the wrong endpoint. Pass
+a site id to run just that one:
+
+```bash
+npm run soak -- pinterest
+```
+
+Cookie values are never printed. The jar is read per host, and only counts and
+hostnames come out of it.
+
 ## Before you change anything
 
 Read `DESIGN.md` and `docs/adr/`. They record decisions and the reasons, which

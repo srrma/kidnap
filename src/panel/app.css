@@ -68,14 +68,28 @@ button {
   flex: 1;
 }
 
+/*
+ * 44px is the minimum target, not the visual size. The glyph is set small on
+ * purpose: a bar of five large squares reads as a toolbar and pushes the count
+ * and the title out of a narrow panel. The target is grown back with an
+ * overlay instead of with padding, so the control stays compact and the whole
+ * square stays clickable.
+ */
 .icon-button {
+  position: relative;
   display: inline-grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--r-input);
   border: 1px solid transparent;
   color: var(--text-muted);
+}
+
+.icon-button::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .icon-button:hover {
@@ -314,9 +328,15 @@ button {
   text-decoration: underline;
 }
 
+/*
+ * The gap has to clear the two overlays meeting in the middle, or one action's
+ * target would sit on top of its neighbour and a click would land on the wrong
+ * button. Eight pixels of gap with four pixels of horizontal overhang leaves
+ * each target its own 44px and nothing shared.
+ */
 .row-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   flex: none;
 }
 
@@ -335,12 +355,19 @@ button {
 /* The one accent-filled control in the list, and the only place a row
    spends colour on an action. */
 .act-primary {
+  position: relative;
   padding: 4px 11px;
   border-radius: var(--r-pill);
   background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
-  min-height: 26px;
+  min-height: 30px;
+}
+
+.act-primary::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
 }
 
 .act-primary:hover {
@@ -348,11 +375,18 @@ button {
 }
 
 .act-quiet {
+  position: relative;
   padding: 4px 9px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  min-height: 26px;
+  min-height: 30px;
+}
+
+.act-quiet::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
 }
 
 .act-quiet:hover {
