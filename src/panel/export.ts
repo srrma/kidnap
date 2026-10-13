@@ -46,11 +46,23 @@ function exportable(item: Record<string, unknown>): Record<string, unknown> {
   return out;
 }
 
-/** The export body, sorted so two exports of the same list compare equal. */
+/**
+ * The export body, sorted so two exports of the same list compare equal.
+ *
+ * Everything that leaves as a string goes through the same redaction, not only
+ * the items. The page the list came from was the one leak: an item's URL is
+ * redacted, but the enclosing header carried the page URL untouched, and on a
+ * signed-in page that is where a captcha key and a session token live.
+ */
 export function toJson(items: unknown[], meta: Record<string, unknown> = {}): string {
   const rows = items
     .map((item) => exportable(item as Record<string, unknown>))
     .sort((a, b) => String(a.url ?? '').localeCompare(String(b.url ?? '')));
 
-  return `${JSON.stringify({ ...meta, count: rows.length, items: rows }, null, 2)}\n`;
+  const header: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(meta)) {
+    header[key] = typeof value === 'string' ? redactQuery(value) : value;
+  }
+
+  return `${JSON.stringify({ ...header, count: rows.length, items: rows }, null, 2)}\n`;
 }

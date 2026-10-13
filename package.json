@@ -20,7 +20,9 @@
     "lint:fix": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run lint && npm test && npm run build"
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build",
+    "smoke": "node scripts/smoke.mjs",
+    "soak": "node scripts/soak.mjs"
   },
   "dependencies": {
     "mediabunny": "^1.55.5",

@@ -55,6 +55,14 @@ describe('toJson', () => {
     expect(a).toBe(b);
   });
 
+  it('redacts the header, which is where a page token actually lives', () => {
+    const body = toJson([{ url: 'https://cdn.example/a.jpg' }], {
+      page: 'https://www.pinterest.com/feed/?invite_code=SECRETVALUE123456&token=abc',
+    });
+    expect(body).toContain('invite_code=REDACTED');
+    expect(body).not.toContain('SECRETVALUE123456');
+  });
+
   it('reports how many rows it wrote', () => {
     expect(JSON.parse(toJson([{ url: 'https://cdn.example/a.jpg' }])).count).toBe(1);
   });
