@@ -8,7 +8,7 @@
  */
 
 import type { MediaItem, MediaVariant, SortMode } from './types';
-import { canonical } from './url';
+import { canonical, parse } from './url';
 
 export function pixels(item: { width?: number; height?: number }): number {
   if (!item.width || !item.height) return 0;
@@ -37,13 +37,26 @@ export function consolidate(items: readonly MediaItem[]): MediaItem[] {
   const rows: MediaItem[] = [];
 
   for (const item of byUrl.values()) {
-    if (!item.groupId) {
+    if (item.groupId) {
+      const members = groups.get(`group:${item.groupId}`);
+      if (members) members.push(item);
+      else groups.set(`group:${item.groupId}`, [item]);
+      continue;
+    }
+
+    /*
+     * An add-on can say two sightings are one post. Failing that, the URL
+     * sometimes says it: one picture served at six sizes differs from itself in
+     * a single path segment that names a rendition, and nothing else.
+     */
+    const identity = renditionIdentity(item.url);
+    if (identity === null) {
       rows.push(item);
       continue;
     }
-    const members = groups.get(item.groupId);
+    const members = groups.get(`rendition:${identity}`);
     if (members) members.push(item);
-    else groups.set(item.groupId, [item]);
+    else groups.set(`rendition:${identity}`, [item]);
   }
 
   for (const members of groups.values()) {
@@ -94,11 +107,45 @@ function pickBest(members: MediaItem[]): MediaItem {
     url: member.url,
     width: member.width,
     height: member.height,
-    bitrate: member.bytes,
+    bitrate: member.bitrate,
     codecs: member.codecs,
   }));
 
   return { ...best, variants };
+}
+
+/**
+ * Path segments that name a rendition rather than identify a thing.
+ *
+ * Closed on purpose. "One segment differs" on its own is not enough to call two
+ * URLs the same file: `/users/alice/avatar.jpg` and `/users/bob/avatar.jpg`
+ * differ in exactly one segment and are obviously two different people. What
+ * separates them is that the differing segment here means nothing you could
+ * guess, whereas the ones here mean exactly one thing.
+ */
+const RENDITION =
+  /^(?:\d+|\d+[_-][a-z0-9]+|\d+x\d*|(?:max|min)_?\d+(?:_[a-z]+)?|originals?|large|medium|small|thumb|thumbnail|preview|full|raw|src|hd|sd)$/i;
+
+/**
+ * A key under which the renditions of one file are known to agree, or null
+ * when the URL does not speak to it.
+ *
+ * Null is the common answer, and deliberately so. A path qualifies only when it
+ * contains exactly one segment from the list above; two of them means the
+ * guessing has stopped being reliable, and none means there is no rendition
+ * structure to read at all. Those URLs fall back to comparing exactly, which
+ * was correct before any of this and stays correct now.
+ */
+export function renditionIdentity(url: string): string | null {
+  const parsed = parse(url);
+  if (!parsed) return null;
+
+  const segments = parsed.pathname.split('/').filter(Boolean);
+  const marks = segments.filter((segment) => RENDITION.test(segment));
+  if (marks.length !== 1) return null;
+
+  const key = segments.map((segment) => (RENDITION.test(segment) ? '*' : segment)).join('/');
+  return `${parsed.host}${parsed.pathname.startsWith('/') ? '' : '/'}${key}`;
 }
 
 const comparators: Record<SortMode, (a: MediaItem, b: MediaItem) => number> = {

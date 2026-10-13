@@ -513,7 +513,18 @@ function highlight(urls: string[]): void {
   if (urls.length === 0) return;
 
   const wanted = new Set(urls.map(canonical));
-  const row = state.rows.find((item) => wanted.has(canonical(item.url)));
+
+  /*
+   * A rendition counts. On a page that serves one picture at six sizes, what
+   * the pointer is over is whichever size the browser chose, and the row is
+   * whichever size was detected first. They are the same picture, and the
+   * whole reason the row carries a quality picker is that it knows so.
+   */
+  const row = state.rows.find(
+    (item) =>
+      wanted.has(canonical(item.url)) ||
+      item.variants?.some((variant) => wanted.has(canonical(variant.url))),
+  );
   if (!row) return;
 
   const node = listElement.querySelector<HTMLElement>(`[data-id="${CSS.escape(row.id)}"]`);
