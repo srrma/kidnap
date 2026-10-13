@@ -32,6 +32,11 @@ export interface Messages {
   'doc:html': { req: { url: string; html: string }; res: void };
   'addons:markers': { req: void; res: { markers: string[] } };
   'drm:seen': { req: { tabId?: number }; res: void };
+  /* The pointer moved onto a picture; the panel matches these against its list. */
+  'dom:hover': { req: { urls: string[] }; res: void };
+  'picker:set': { req: { tabId: number; on: boolean }; res: void };
+  /* Background to panel, carrying what the pointer is over. */
+  'panel:hover': { req: { urls: string[] }; res: void };
 
   /* panel into the background */
   'media:list': { req: { tabId: number }; res: { items: MediaItem[] } };

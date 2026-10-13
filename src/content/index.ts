@@ -13,6 +13,7 @@ import { guessMime } from '../core/kind';
 import type { Settings } from '../core/types';
 import { api } from '../platform';
 import { firstSweep, readPage, scrape } from './dom';
+import { startPicker, stopPicker } from './picker';
 
 const RESCAN_MS = 600;
 
@@ -35,6 +36,20 @@ let observer: MutationObserver | null = null;
  * - document_start means documentElement but not head, so that is what we
  *   attach to.
  */
+api.runtime.onMessage.addListener(
+  (
+    message: { to?: string; payload?: { on?: boolean } },
+    _sender: unknown,
+    sendResponse: (r: unknown) => void,
+  ) => {
+    if (message?.to !== 'picker') return false;
+    if (message.payload?.on) startPicker();
+    else stopPicker();
+    sendResponse({ heard: true, on: message.payload?.on });
+    return true;
+  },
+);
+
 function injectHook(): void {
   try {
     const script = document.createElement('script');

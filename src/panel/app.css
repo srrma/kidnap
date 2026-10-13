@@ -84,6 +84,21 @@ button {
   color: var(--text);
 }
 
+/* An armed tool stays visibly armed, so the page is not being watched by
+   something the panel has quietly forgotten about. */
+.icon-button-on,
+.icon-button-on:hover {
+  background: var(--surface-raised);
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.row-pick {
+  background: var(--surface-raised);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
 .icon-button[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);

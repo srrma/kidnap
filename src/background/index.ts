@@ -223,6 +223,31 @@ async function markProtected(tabId: number): Promise<void> {
   }
 }
 
+/*
+ * The pointer position is never written to storage. A hover is transient and
+ * high frequency, and routing it through the session store would mean a write
+ * per element the cursor crossed for a value that is stale a moment later.
+ */
+on('dom:hover', async (payload, sender) => {
+  const tabId = sender.tab?.id;
+  if (tabId === undefined) return;
+  /*
+   * On the runtime channel rather than the tab one. A panel is an extension
+   * page, not the tab's content script, so a message addressed to the tab never
+   * reaches it. Every open panel hears this, so the tab is named in the
+   * payload and a panel showing a different tab drops it.
+   */
+  void Promise.resolve(
+    api.runtime.sendMessage({ to: 'panel:hover', payload: { ...payload, tabId } }),
+  ).catch(() => undefined);
+});
+
+on('picker:set', async ({ tabId, on: wanted }) => {
+  await api.tabs
+    .sendMessage(tabId, { to: 'picker', payload: { on: wanted } })
+    .catch(() => undefined);
+});
+
 on('media:list', async ({ tabId }) => ({ items: await store.list(tabId) }));
 on('media:clear', async ({ tabId }) => {
   await store.clear(tabId);

@@ -53,6 +53,46 @@ export function scrape(document: Document, seen: Set<string>): ScrapeResult {
   return { items, page: readPage(document) };
 }
 
+/**
+ * Every URL this element could be showing, resolved the way the scrape
+ * resolves it.
+ *
+ * The picker asks this of whatever the cursor is over, so a hovered element
+ * and a scraped one produce identical strings and therefore match. Resolving
+ * them separately would mean maintaining the attribute list twice, and the two
+ * lists would disagree the first time a site needed a new lazy attribute.
+ */
+export function sourcesFor(element: Element): string[] {
+  const attrs = SOURCES[element.tagName] ?? [];
+  const out: string[] = [];
+
+  for (const attr of attrs) {
+    const value = element.getAttribute(attr);
+    if (!value) continue;
+
+    if (attr === 'srcset') {
+      out.push(...parseSrcset(value, element).map((entry) => entry.url));
+      continue;
+    }
+    if (attr.endsWith('href')) {
+      /* Only links that clearly point at a file, not every anchor on the page. */
+      if (looksLikeFile(value)) out.push(resolve(value, element) ?? '');
+      continue;
+    }
+    out.push(resolve(value, element) ?? '');
+  }
+
+  /*
+   * What the browser actually chose, which is what the sniff saw and what the
+   * item is keyed on. A picture element with a srcset the browser picked the
+   * low-density entry from reports only that entry here.
+   */
+  const current = (element as HTMLImageElement | HTMLMediaElement).currentSrc;
+  if (current) out.push(current);
+
+  return out.filter(Boolean);
+}
+
 function collect(element: HTMLElement, items: RawItem[], seen: Set<string>): void {
   const attrs = SOURCES[element.tagName] ?? [];
   for (const attr of attrs) {

@@ -17,7 +17,7 @@ import type {
   StreamJob,
   TabJobs,
 } from '../core/types';
-import { displayHost, fileNameOf } from '../core/url';
+import { canonical, displayHost, fileNameOf } from '../core/url';
 import { activeTabId, api, supportsSidePanel } from '../platform';
 import { bytes, clear, duration, el, toast } from './dom';
 import { toJson } from './export';
@@ -49,6 +49,7 @@ interface State {
   selecting: boolean;
   error: string | null;
   loading: boolean;
+  picking: boolean;
 }
 
 const state: State = {
@@ -62,6 +63,7 @@ const state: State = {
   selecting: false,
   error: null,
   loading: true,
+  picking: false,
 };
 
 const root = document.getElementById('app') as HTMLElement;
@@ -141,6 +143,15 @@ function refresh(): Promise<void> {
 }
 
 /** The background owns the store, so storage changes drive the refresh. */
+api.runtime.onMessage.addListener(
+  (message: { to?: string; payload?: { urls?: string[]; tabId?: number } }) => {
+    if (message?.to !== 'panel:hover') return;
+    if (message.payload?.tabId !== state.tabId) return;
+    if (!state.picking) return;
+    highlight(message.payload?.urls ?? []);
+  },
+);
+
 api.storage.onChanged.addListener((changes, area) => {
   if (area !== 'session') return;
   if (state.tabId === null) return;
@@ -322,6 +333,23 @@ function header(count: number): HTMLElement {
     el(
       'button',
       {
+        class: state.picking ? 'icon-button icon-button-on' : 'icon-button',
+        type: 'button',
+        'aria-pressed': String(state.picking),
+        'aria-label': 'Point at a picture on the page to find its row',
+        title: 'Point at a picture on the page to find its row',
+        onClick: () => {
+          state.picking = !state.picking;
+          if (state.tabId !== null)
+            void request('picker:set', { tabId: state.tabId, on: state.picking });
+          render();
+        },
+      },
+      [state.picking ? '◎' : '○'],
+    ),
+    el(
+      'button',
+      {
         class: 'icon-button',
         type: 'button',
         'aria-label': 'Export the list as JSON',
@@ -468,6 +496,39 @@ function reconcile(list: HTMLElement, items: MediaItem[]): void {
       list.insertBefore(node, stateNode ? stateNode.nextSibling : null);
     }
     previous = node;
+  }
+}
+
+/**
+ * Highlights the row the pointer is over on the page.
+ *
+ * `currentSrc` is included by the content script precisely so that a hovered
+ * element and a scraped one produce the same string, so this is a comparison
+ * rather than a heuristic. Canonicalising both sides covers the fragment and
+ * the relative-path cases the two could still disagree on.
+ */
+function highlight(urls: string[]): void {
+  const previous = listElement.querySelector('.row-pick');
+  if (previous) previous.classList.remove('row-pick');
+  if (urls.length === 0) return;
+
+  const wanted = new Set(urls.map(canonical));
+  const row = state.rows.find((item) => wanted.has(canonical(item.url)));
+  if (!row) return;
+
+  const node = listElement.querySelector<HTMLElement>(`[data-id="${CSS.escape(row.id)}"]`);
+  if (!node) return;
+  node.classList.add('row-pick');
+
+  /*
+   * Only when the row is actually off screen. Scrolling on every hover would
+   * fight the person's own scrolling, and on a long list the row is usually
+   * nowhere near where they were last looking.
+   */
+  const box = node.getBoundingClientRect();
+  const view = listElement.getBoundingClientRect();
+  if (box.top < view.top || box.bottom > view.bottom) {
+    node.scrollIntoView({ block: 'nearest' });
   }
 }
 
