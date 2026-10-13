@@ -549,7 +549,7 @@ function update(node: HTMLElement, item: MediaItem): void {
   );
   opener.addEventListener('click', () => openPreview(item, download));
 
-  node.append(opener, actions(item, node));
+  node.append(opener, actions(item));
 }
 
 function thumb(item: MediaItem): HTMLElement {
@@ -716,68 +716,7 @@ function sourceLine(item: MediaItem): HTMLElement | null {
   return line;
 }
 
-/**
- * Everything the detectors and add-ons know about one item.
- *
- * The summary line is a summary. It leaves out the fields that matter when
- * something is wrong — the content type, the byte count, the ETag, which
- * detector claimed it — and those are exactly the fields a bug report needs.
- */
-function detailBlock(item: MediaItem): HTMLElement {
-  const shown: Array<[string, string]> = [
-    ['Kind', item.kind],
-    ['Type', item.mime ?? ''],
-    ['Size', item.bytes ? bytes(item.bytes) : ''],
-    ['Dimensions', item.width && item.height ? `${item.width} x ${item.height}` : ''],
-    ['Duration', item.duration ? duration(item.duration) : ''],
-    ['Bitrate', item.bitrate ? `${item.bitrate} kbps` : ''],
-    ['Codecs', item.codecs ?? ''],
-    ['Author', item.author ?? ''],
-    ['Published', item.published ?? ''],
-    ['Caption', item.caption ?? ''],
-    ['Alt text', item.alt ?? ''],
-    ['Album', item.album ?? ''],
-    ['Track', item.track ?? ''],
-    ['Page', item.pageTitle ?? ''],
-    ['Detector', item.detector],
-    ['ETag', item.etag ?? ''],
-    ['Modified', item.lastModified ?? ''],
-  ].filter(([, value]) => value !== '') as Array<[string, string]>;
-
-  const variants = item.variants?.length
-    ? el('div', { class: 'row-detail-row' }, [
-        el('span', { class: 'row-detail-key' }, ['Variants']),
-        el('span', {}, [
-          item.variants
-            .map((v) => [v.width, v.height].filter(Boolean).join('x') || v.codecs || '')
-            .filter(Boolean)
-            .join(', ') || `${item.variants.length}`,
-        ]),
-      ])
-    : null;
-
-  const url = el('div', { class: 'row-detail-row' }, [
-    el('span', { class: 'row-detail-key' }, ['URL']),
-    el('span', { class: 'row-detail-value row-detail-url' }, [item.url]),
-  ]);
-
-  return el(
-    'div',
-    { class: 'row-detail' },
-    [
-      ...shown.map(([key, value]) =>
-        el('div', { class: 'row-detail-row' }, [
-          el('span', { class: 'row-detail-key' }, [key]),
-          el('span', { class: 'row-detail-value' }, [value]),
-        ]),
-      ),
-      variants,
-      url,
-    ].filter(Boolean) as Node[],
-  );
-}
-
-function actions(item: MediaItem, node: HTMLElement): HTMLElement {
+function actions(item: MediaItem): HTMLElement {
   const copy = el(
     'button',
     {
@@ -826,34 +765,7 @@ function actions(item: MediaItem, node: HTMLElement): HTMLElement {
         )
       : null;
 
-  const detail = el(
-    'button',
-    {
-      class: 'act-quiet',
-      type: 'button',
-      title: 'Show every field this item has',
-      'aria-label': `Show details for ${item.name ?? item.url}`,
-      'aria-expanded': 'false',
-      onClick: (event: Event) => {
-        const button = event.currentTarget as HTMLButtonElement;
-        const open = button.getAttribute('aria-expanded') === 'true';
-        button.setAttribute('aria-expanded', open ? 'false' : 'true');
-        const existing = node.querySelector('.row-detail');
-        if (existing) {
-          existing.remove();
-          return;
-        }
-        node.append(detailBlock(item));
-      },
-    },
-    ['Details'],
-  );
-
-  return el(
-    'div',
-    { class: 'row-actions' },
-    ttf ? [detail, copy, save, ttf] : [detail, copy, save],
-  );
+  return el('div', { class: 'row-actions' }, ttf ? [copy, save, ttf] : [copy, save]);
 }
 
 /**

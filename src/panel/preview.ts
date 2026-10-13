@@ -122,6 +122,7 @@ function metaTable(item: MediaItem): HTMLElement {
     ['Length', duration(item.duration)],
     ['Format', item.mime],
     ['Codecs', item.codecs],
+    ['Bitrate', item.bitrate ? `${item.bitrate} kbps` : undefined],
     ['Author', item.author],
     ['Album', item.album],
     ['Track', item.track],
@@ -135,6 +136,24 @@ function metaTable(item: MediaItem): HTMLElement {
   ];
 
   const list = el('dl', { class: 'meta' });
+
+  /*
+   * Where the post lives. The row links it too, but the sheet is opened
+   * because someone is deciding whether this is the file they meant, and
+   * "which post was this" is the fastest way to that answer: it puts the file
+   * back in the timeline next to its neighbours.
+   */
+  if (item.pageUrl) {
+    list.append(
+      el('dt', {}, ['Post']),
+      el('dd', {}, [
+        el('a', { href: item.pageUrl, target: '_blank', rel: 'noreferrer noopener' }, [
+          item.postId ?? 'Open the post this came from',
+        ]),
+      ]),
+    );
+  }
+
   for (const [label, value] of rows) {
     if (!value) continue;
     list.append(el('dt', {}, [label]), el('dd', {}, [value]));

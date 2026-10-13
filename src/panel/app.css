@@ -299,33 +299,6 @@ button {
   text-decoration: underline;
 }
 
-.row-detail {
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  grid-column: 1 / -1;
-  padding: 6px 0 2px;
-  width: 100%;
-}
-
-.row-detail-row {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 84px minmax(0, 1fr);
-  padding: 2px 0;
-}
-
-.row-detail-key {
-  color: var(--text-muted);
-}
-
-.row-detail-value {
-  overflow-wrap: anywhere;
-}
-
-.row-detail-url {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
 .row-actions {
   display: flex;
   gap: 4px;
