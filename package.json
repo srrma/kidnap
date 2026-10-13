@@ -1,6 +1,6 @@
 {
   "name": "kidnap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Detect, preview and download media from any page. Runs entirely on your machine.",
   "license": "MIT",
   "private": true,

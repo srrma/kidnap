@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.1
+
+The picker, rendition grouping, author and permalink on every row, and a JSON
+export with query values stripped. Two claims in this project's own
+documentation did not survive being checked against the code: the README denied
+the request that poster frames make, and the release notes implied site
+awareness that only one add-on currently has against live traffic. Both are
+corrected, and the limitation is recorded where a reader will find it.
+
+Controls meet a 44px target.
+
 ## 1.0.0
 
 The first release.
