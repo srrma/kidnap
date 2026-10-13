@@ -20,6 +20,7 @@ import type {
 import { displayHost, fileNameOf } from '../core/url';
 import { activeTabId, api, supportsSidePanel } from '../platform';
 import { bytes, clear, duration, el, toast } from './dom';
+import { toJson } from './export';
 import { saveFontAsTtf } from './font';
 import { openPreview } from './preview';
 import { openSettings } from './settings';
@@ -318,6 +319,17 @@ function header(count: number): HTMLElement {
     el('span', { class: 'count' }, [count === 1 ? '1 item' : `${count} items`]),
     el('div', { class: 'spacer' }),
     ...bulk,
+    el(
+      'button',
+      {
+        class: 'icon-button',
+        type: 'button',
+        'aria-label': 'Export the list as JSON',
+        title: 'Export the list as JSON',
+        onClick: () => exportList(),
+      },
+      ['{}'],
+    ),
     toggle,
     themeButton,
     el(
@@ -459,6 +471,36 @@ function reconcile(list: HTMLElement, items: MediaItem[]): void {
   }
 }
 
+/**
+ * Hands the whole list over as JSON, for an add-on author or a bug report.
+ *
+ * The panel shows a summary line, so everything else it knows is invisible
+ * unless it is given away. Signatures are not: a media URL routinely carries a
+ * token in its query string, and an export is the thing most likely to be
+ * pasted somewhere public. `redactQuery` keeps the parameter names, which say
+ * what a site signs with, and drops the values.
+ */
+function exportList(): void {
+  const rows = visible();
+  if (rows.length === 0) {
+    toast('Nothing to export');
+    return;
+  }
+  const body = toJson(rows, {
+    extension: 'kidnap',
+    page: rows.find((item) => item.pageUrl)?.pageUrl,
+    exportedAt: new Date().toISOString(),
+  });
+  const blob = new Blob([body], { type: 'application/json' });
+  const href = URL.createObjectURL(blob);
+  const link = el('a', { href, download: `kidnap-export.json` });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(href);
+  toast(`Exported ${rows.length} ${rows.length === 1 ? 'item' : 'items'}`);
+}
+
 function row(item: MediaItem): HTMLElement {
   const node = el('div', { class: 'row', role: 'listitem', 'data-id': item.id });
   update(node, item);
@@ -507,7 +549,7 @@ function update(node: HTMLElement, item: MediaItem): void {
   );
   opener.addEventListener('click', () => openPreview(item, download));
 
-  node.append(opener, actions(item));
+  node.append(opener, actions(item, node));
 }
 
 function thumb(item: MediaItem): HTMLElement {
@@ -642,13 +684,100 @@ function meta(item: MediaItem): HTMLElement {
 
   const title = item.name ?? fileNameOf(item.url) ?? displayHost(item.url);
 
+  const source = sourceLine(item);
+
   return el('div', { class: 'row-main' }, [
     el('div', { class: 'row-name', title }, [title]),
     el('div', { class: 'row-meta' }, [facts.join('  ·  ')]),
+    ...(source ? [source] : []),
   ]);
 }
 
-function actions(item: MediaItem): HTMLElement {
+/**
+ * Who made it and where it lives. Every add-on gathers both, and the summary
+ * line above has no room for either. This is the one line most people actually
+ * want: it turns a row of files into a row of things somebody posted.
+ */
+function sourceLine(item: MediaItem): HTMLElement | null {
+  const permalink = item.pageUrl;
+  const who = item.author ?? item.album ?? item.track;
+  if (!who && !permalink) return null;
+
+  const line = el('div', { class: 'row-source' }, [who ?? '']);
+  if (permalink) {
+    line.append(
+      el(
+        'a',
+        { class: 'row-link', href: permalink, target: '_blank', rel: 'noreferrer noopener' },
+        ['Permalink'],
+      ),
+    );
+  }
+  return line;
+}
+
+/**
+ * Everything the detectors and add-ons know about one item.
+ *
+ * The summary line is a summary. It leaves out the fields that matter when
+ * something is wrong — the content type, the byte count, the ETag, which
+ * detector claimed it — and those are exactly the fields a bug report needs.
+ */
+function detailBlock(item: MediaItem): HTMLElement {
+  const shown: Array<[string, string]> = [
+    ['Kind', item.kind],
+    ['Type', item.mime ?? ''],
+    ['Size', item.bytes ? bytes(item.bytes) : ''],
+    ['Dimensions', item.width && item.height ? `${item.width} x ${item.height}` : ''],
+    ['Duration', item.duration ? duration(item.duration) : ''],
+    ['Bitrate', item.bitrate ? `${item.bitrate} kbps` : ''],
+    ['Codecs', item.codecs ?? ''],
+    ['Author', item.author ?? ''],
+    ['Published', item.published ?? ''],
+    ['Caption', item.caption ?? ''],
+    ['Alt text', item.alt ?? ''],
+    ['Album', item.album ?? ''],
+    ['Track', item.track ?? ''],
+    ['Page', item.pageTitle ?? ''],
+    ['Detector', item.detector],
+    ['ETag', item.etag ?? ''],
+    ['Modified', item.lastModified ?? ''],
+  ].filter(([, value]) => value !== '') as Array<[string, string]>;
+
+  const variants = item.variants?.length
+    ? el('div', { class: 'row-detail-row' }, [
+        el('span', { class: 'row-detail-key' }, ['Variants']),
+        el('span', {}, [
+          item.variants
+            .map((v) => [v.width, v.height].filter(Boolean).join('x') || v.codecs || '')
+            .filter(Boolean)
+            .join(', ') || `${item.variants.length}`,
+        ]),
+      ])
+    : null;
+
+  const url = el('div', { class: 'row-detail-row' }, [
+    el('span', { class: 'row-detail-key' }, ['URL']),
+    el('span', { class: 'row-detail-value row-detail-url' }, [item.url]),
+  ]);
+
+  return el(
+    'div',
+    { class: 'row-detail' },
+    [
+      ...shown.map(([key, value]) =>
+        el('div', { class: 'row-detail-row' }, [
+          el('span', { class: 'row-detail-key' }, [key]),
+          el('span', { class: 'row-detail-value' }, [value]),
+        ]),
+      ),
+      variants,
+      url,
+    ].filter(Boolean) as Node[],
+  );
+}
+
+function actions(item: MediaItem, node: HTMLElement): HTMLElement {
   const copy = el(
     'button',
     {
@@ -697,7 +826,34 @@ function actions(item: MediaItem): HTMLElement {
         )
       : null;
 
-  return el('div', { class: 'row-actions' }, ttf ? [copy, save, ttf] : [copy, save]);
+  const detail = el(
+    'button',
+    {
+      class: 'act-quiet',
+      type: 'button',
+      title: 'Show every field this item has',
+      'aria-label': `Show details for ${item.name ?? item.url}`,
+      'aria-expanded': 'false',
+      onClick: (event: Event) => {
+        const button = event.currentTarget as HTMLButtonElement;
+        const open = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', open ? 'false' : 'true');
+        const existing = node.querySelector('.row-detail');
+        if (existing) {
+          existing.remove();
+          return;
+        }
+        node.append(detailBlock(item));
+      },
+    },
+    ['Details'],
+  );
+
+  return el(
+    'div',
+    { class: 'row-actions' },
+    ttf ? [detail, copy, save, ttf] : [detail, copy, save],
+  );
 }
 
 /**
